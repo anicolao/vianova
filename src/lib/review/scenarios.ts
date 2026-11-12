@@ -1,5 +1,6 @@
-import { fixture, tile, domino, person, fullCity } from '../review/fixtures';
-import type { Scenario, SceneView, Beat, MotionCue, Frame } from './types';
+import { fixture, tile, domino, person, fullCity } from './fixtures';
+import type { SceneView } from '../presentation/types';
+import type { Scenario, Beat, MotionCue, Frame } from './timeline-types';
 const beat = (
   at: number,
   label: string,
@@ -95,9 +96,9 @@ export const scenarios: Scenario[] = [
         'Three Market actions',
         'Create three population, allocating each as a Soldier or Engineer.',
         (v) => {
-          v.players[0].reserve = v.players[0].reserve.slice(3);
-          v.players[0].soldiers.push(p(), p());
-          v.players[0].engineers.push(p());
+          const created = v.players[0].reserve.splice(0, 3);
+          v.players[0].soldiers.push(created[0], created[1]);
+          v.players[0].engineers.push(created[2]);
           addLog(v, 'Arch: 3 Market actions.');
         },
         { cells: ['3,2'] }
@@ -154,8 +155,8 @@ export const scenarios: Scenario[] = [
     beats: [
       beat(0, 'Choose a profession', 'Create a Soldier or an Engineer from your reserve.'),
       beat(1.8, 'One new Soldier', 'The meeple arrives 1-side up.', (v) => {
-        v.players[0].reserve = v.players[0].reserve.slice(1);
-        v.players[0].soldiers.push(p());
+        const created = v.players[0].reserve.shift()!;
+        v.players[0].soldiers.push(created);
         addLog(v, 'Aurelia created a Soldier (1).');
       })
     ],
@@ -211,8 +212,8 @@ export const scenarios: Scenario[] = [
         beat(0, 'Choose a contest', 'The two areas are separate competitions.'),
         beat(2, 'Population committed', 'Value 2 is retained on deployment.', (v) => {
           const key = role === 'soldier' ? 'soldiers' : 'engineers';
-          v.players[0][key] = v.players[0][key].slice(1);
-          v.areas[role === 'soldier' ? 0 : 2].people.push(p(2));
+          const deployed = v.players[0][key].shift()!;
+          v.areas[role === 'soldier' ? 0 : 2].people.push(deployed);
           addLog(v, `Aurelia deployed a ${role} (2).`);
         })
       ],

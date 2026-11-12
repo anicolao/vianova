@@ -4,8 +4,16 @@
   let {
     reward,
     selected = false,
+    disabled = false,
+    reason,
     onclick
-  }: { reward: Reward; selected?: boolean; onclick?: () => void } = $props();
+  }: {
+    reward: Reward;
+    selected?: boolean;
+    disabled?: boolean;
+    reason?: string;
+    onclick?: () => void;
+  } = $props();
 </script>
 
 {#snippet stack()}<span class="stack-tiles"
@@ -20,9 +28,17 @@
     aria-label="Reward: {reward.tiles.map((t) => t.building).join(' and ')}{reward.tiles.length > 1
       ? ', take both'
       : ''}"
+    {disabled}
+    title={reason}
     {onclick}
+    data-reward-id={reward.id}
     data-component="RewardStack">{@render stack()}</button
-  >{:else}<div class="reward" class:selected data-component="RewardStack">
+  >{:else}<div
+    class="reward"
+    class:selected
+    data-reward-id={reward.id}
+    data-component="RewardStack"
+  >
     {@render stack()}
   </div>{/if}
 

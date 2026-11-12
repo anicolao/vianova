@@ -1,15 +1,24 @@
 <script lang="ts">
+  import { gameArt } from '../presentation/art';
+  import BuildingSymbol from './BuildingSymbol.svelte';
+  import type { ControlState } from '../presentation/controller';
   import Population from './Population.svelte';
   import { type PlayerView } from '../presentation/types';
   let {
     player,
     active = false,
     compact = false,
-    onPerson
+    onPerson,
+    availability,
+    disabled = false,
+    selectedPerson
   }: {
     player: PlayerView;
     active?: boolean;
     compact?: boolean;
+    availability?: Record<string, ControlState>;
+    disabled?: boolean;
+    selectedPerson?: string;
     onPerson?: (group: 'soldiers' | 'engineers' | 'reserve', id: string) => void;
   } = $props();
   const symbols = { teal: '◆', coral: '●', gold: '▲', lilac: '✦' };
@@ -17,6 +26,7 @@
 
 <section
   class="player-mat {player.owner}"
+  style:--mat-art={`url("${gameArt('player-mat')}")`}
   class:active
   class:compact
   data-component="PlayerMat"
@@ -34,12 +44,19 @@
         class="well {group}"
         data-anchor="{group}-{player.owner}"
       >
-        <span class="well-label">{group === 'soldiers' ? '⚔ Soldiers' : '▧ Engineers'}</span>
+        <span class="well-label"
+          ><span class="profession-symbol"
+            ><BuildingSymbol building={group === 'soldiers' ? 'barracks' : 'library'} /></span
+          >{group === 'soldiers' ? 'Soldiers' : 'Engineers'}</span
+        >
         <div class="people">
-          {#each player[group] as person, i}<Population
+          {#each player[group] as person}<Population
               {person}
+              selected={person.id === selectedPerson}
+              disabled={disabled || (!!availability && !availability[person.id]?.enabled)}
+              reason={availability?.[person.id]?.reason}
               small={compact}
-              onclick={onPerson ? () => onPerson(group, String(i)) : undefined}
+              onclick={onPerson ? () => onPerson(group, person.id) : undefined}
             />{/each}{#if !player[group].length}<span class="none">None ready</span>{/if}
         </div>
         <span class="population-total"
@@ -49,8 +66,21 @@
   </div>
   <div class="reserve" data-anchor="reserve-{player.owner}">
     <span class="well-label">Reserve</span>
-    <div class="reserve-people">
-      {#each player.reserve as person}<Population {person} small />{/each}
+    <!-- svelte-ignore a11y_no_noninteractive_tabindex (Scrollable reserve pieces need keyboard access.) -->
+    <div
+      class="reserve-people"
+      role="region"
+      tabindex="0"
+      aria-label="Reserve pieces, scroll to view all"
+    >
+      {#each player.reserve as person}<Population
+          {person}
+          selected={person.id === selectedPerson}
+          small
+          disabled={disabled || (!!availability && !availability[person.id]?.enabled)}
+          reason={availability?.[person.id]?.reason}
+          onclick={onPerson ? () => onPerson('reserve', person.id) : undefined}
+        />{/each}
     </div>
     <span>{player.reserve.length}</span>
   </div>
@@ -207,5 +237,124 @@
   }
   .compact .population-total {
     font-size: 8px;
+  }
+
+  .player-mat {
+    display: grid;
+    grid-template-columns: 17% 1fr 1fr;
+    grid-template-rows: minmax(62px, auto) 1fr;
+    gap: 8px;
+    padding: 5% 6% 7%;
+    min-height: 300px;
+    background: var(--mat-art) center/100% 100% no-repeat;
+    border: 0;
+    box-shadow:
+      0 4px 0 #655136,
+      0 8px 12px #0005;
+  }
+  header,
+  .compact header {
+    grid-column: 1/-1;
+    padding: 3px 5px 13px;
+    background: transparent;
+    color: #ffedc7;
+    border: 0;
+  }
+  header div > span,
+  .personal-count small {
+    color: #eadcb9;
+    font-size: 12px;
+  }
+  header strong,
+  .compact header strong {
+    font-size: 23px;
+  }
+  .mat-wells,
+  .compact .mat-wells {
+    grid-column: 2/4;
+    grid-row: 2;
+    padding: 24px 0 0;
+    gap: 12px;
+  }
+  .well,
+  .well.engineers,
+  .compact .well {
+    padding: 5px 0;
+    background: transparent;
+    border: 0;
+  }
+  .well-label {
+    font-size: 12px;
+    letter-spacing: 0.01em;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .profession-symbol {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+  }
+  .population-total,
+  .compact .population-total {
+    font-size: 12px;
+    color: #514b37;
+  }
+  .reserve,
+  .compact .reserve {
+    grid-column: 1;
+    grid-row: 2;
+    background: transparent;
+    border: 0;
+    padding: 24px 0 0;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .reserve-people {
+    align-content: start;
+    justify-content: center;
+  }
+  .reserve-people :global(.person),
+  .compact .reserve-people :global(.person) {
+    width: 36px;
+    height: 44px;
+  }
+  .reserve-people :global(button.person),
+  .compact .reserve-people :global(button.person) {
+    width: 44px;
+    height: 52px;
+  }
+  .active {
+    outline: 2px solid var(--owner);
+    outline-offset: 2px;
+  }
+  .compact {
+    min-height: 240px;
+  }
+
+  .player-mat {
+    grid-template-columns: minmax(44px, 17%) 1fr 1fr;
+    min-height: 244px;
+  }
+  .reserve {
+    min-height: 0;
+  }
+  .reserve-people {
+    max-height: 120px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex: 0 1 auto;
+    scrollbar-width: thin;
+  }
+  .compact .reserve-people {
+    max-height: 92px;
+  }
+  .player-mat.compact {
+    min-height: 228px;
+  }
+
+  .population-total,
+  .compact .population-total {
+    font-size: 14px;
   }
 </style>

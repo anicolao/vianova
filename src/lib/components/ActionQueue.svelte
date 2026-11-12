@@ -1,19 +1,38 @@
 <script lang="ts">
+  import { gameArt } from '../presentation/art';
+  import BuildingSymbol from './BuildingSymbol.svelte';
   import { buildingInfo, type Building } from '../presentation/types';
   let {
     actions,
     ordered = false,
     onChoose,
-    onSkip
+    onSkip,
+    selected,
+    disabled = false,
+    skipAvailable = true
   }: {
-    actions: { id: string; building: Building; count: number; available: boolean }[];
+    actions: {
+      id: string;
+      building: Building;
+      count: number;
+      available: boolean;
+      reason?: string;
+    }[];
     ordered?: boolean;
     onChoose?: (id: string) => void;
     onSkip?: () => void;
+    selected?: string | null;
+    disabled?: boolean;
+    skipAvailable?: boolean;
   } = $props();
 </script>
 
-<section class="action-queue" data-component="ActionQueue" aria-label="Generated building actions">
+<section
+  class="action-queue"
+  style:--tray-art={`url("${gameArt('piece-tray')}")`}
+  data-component="ActionQueue"
+  aria-label="Generated building actions"
+>
   <header>
     <span>{ordered ? 'Resolve in this order' : 'Your matching actions'}</span><small
       >Optional · use this turn</small
@@ -21,19 +40,25 @@
   </header>
   <div>
     {#each actions as action, i}<button
-        disabled={!action.available}
+        disabled={disabled || !onChoose || !action.available}
+        title={action.reason}
+        aria-pressed={selected === action.id}
         onclick={() => onChoose?.(action.id)}
         aria-label="{action.count} {buildingInfo[action.building].name} actions: {buildingInfo[
           action.building
         ].action}"
-        ><span class="action-number">{action.count}</span><span
+        ><span class="action-emblem"><BuildingSymbol building={action.building} /></span><span
+          class="action-number">{action.count}</span
+        ><span
           ><strong>{buildingInfo[action.building].name}</strong><small
             >{buildingInfo[action.building].action}</small
           ></span
         >{#if ordered}<b>{i + 1}</b>{/if}</button
       >{/each}
   </div>
-  {#if onSkip}<button class="skip" onclick={onSkip}>Skip remaining actions →</button>{/if}
+  {#if onSkip}<button class="skip" disabled={disabled || !skipAvailable} onclick={onSkip}
+      >Skip remaining actions →</button
+    >{/if}
 </section>
 
 <style>
@@ -101,5 +126,30 @@
     padding: 7px 0 0;
     font-size: 10px;
     text-decoration: underline;
+  }
+  .action-emblem {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+  }
+
+  .action-queue {
+    background: var(--tray-art) center/100% 100% no-repeat;
+    border: 0;
+    padding: 30px 24px 22px;
+    color: #2d3b32;
+    border-radius: 7px;
+    box-shadow:
+      0 4px 0 #605139,
+      0 7px 12px #0004;
+  }
+  .action-queue > div > button {
+    background: #fff5d6b3;
+  }
+
+  .action-queue strong,
+  .action-queue small,
+  .skip {
+    font-size: 14px;
   }
 </style>

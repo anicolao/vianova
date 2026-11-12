@@ -3,7 +3,7 @@
   import { base } from '$app/paths';
   import { replaceState } from '$app/navigation';
   import WorkshopHeader from '$lib/review/WorkshopHeader.svelte';
-  import { scenarios, getScenario } from '$lib/presentation/scenarios';
+  import { scenarios, getScenario } from '$lib/review/scenarios';
   import { devices, type DeviceId } from '$lib/review/devices';
   let scenarioId = $state('place'),
     deviceId = $state<DeviceId>('desktop'),
@@ -19,6 +19,7 @@
     stage = $state<HTMLDivElement>(),
     ready = $state(false),
     query = $state('');
+  let interactive = $state(false);
   let hydrated = $state(false);
   let playerCount = $state(4);
   const scenario = $derived(getScenario(scenarioId));
@@ -46,6 +47,7 @@
   const groups = [...new Set(scenarios.map((s) => s.group))];
   let mounted = false;
   function broadcast(reset = false) {
+    if (reset) interactive = false;
     if (!ready) return;
     iframe?.contentWindow?.postMessage(
       { type: 'vianova-frame', scenario: scenarioId, time, reduced, reset, players: playerCount },
@@ -132,16 +134,13 @@
     const receive = (e: MessageEvent) => {
       if (e.origin !== location.origin || e.source !== iframe?.contentWindow) return;
       if (e.data?.type === 'vianova-interaction') {
+        interactive = true;
         playing = false;
         updateUrl();
       }
       if (e.data?.type === 'vianova-ready') {
         ready = true;
         broadcast(true);
-      }
-      if (e.data?.type === 'vianova-scenario' && scenarios.some((s) => s.id === e.data.id)) {
-        choose(e.data.id);
-        playing = true;
       }
     };
     window.addEventListener('message', receive);
@@ -275,6 +274,15 @@
             aria-label="Open preview at native size">↗</a
           >
         </div>
+      </div>
+      <div class="review-mode">
+        <strong
+          >{interactive
+            ? 'Direct interaction · simulated fixture outcomes'
+            : 'Prepared animation study'}</strong
+        >{#if interactive}<button class="control" onclick={() => seek(time)}
+            >Return to prepared study</button
+          >{/if}
       </div>
       <div class="viewport-meta">
         <span
@@ -528,6 +536,18 @@
     font-size: 11px;
     min-height: 42px;
     padding: 8px 12px;
+  }
+  .review-mode {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    font-size: 11px;
+    color: #68775e;
+    padding: 10px 0;
+  }
+  .review-mode .control {
+    font-size: 10px;
   }
   .viewport-meta {
     display: flex;

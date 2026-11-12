@@ -14,3 +14,13 @@ transfer ownership of the underlying game or relicense the supplied
 The original generated art proposals are included under GPL-3.0-only to the
 extent copyright applies. Their generation prompts and provenance are
 recorded in art/proposals/prompts.json. They remain unapproved concept art.
+
+The designer-supplied pnp/ PDFs and workbook remain reference materials
+owned by Stefan Alexander; GPL licensing of the implementation does not
+relicense those files. The derived component manifest records source
+provenance and print metadata discrepancies in COMPONENT_MANIFEST.md.
+
+Generated production mosaic assets are included under GPL-3.0-only to the
+extent copyright applies. Exact prompts and generation provenance are in
+art/mosaic/prompts.json. Their inclusion is not designer approval of the
+rendered component designs or icon recognition at physical viewing distance.

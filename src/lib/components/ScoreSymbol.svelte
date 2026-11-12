@@ -1,80 +1,95 @@
 <script lang="ts">
-  import BuildingArt from './BuildingArt.svelte';
+  import BuildingSymbol from './BuildingSymbol.svelte';
+  import ScoreGlyph from './ScoreGlyph.svelte';
+  import { gameArt } from '../presentation/art';
   import { scoreLabel, buildings, type Building, type ScoreMark } from '../presentation/types';
   let { mark }: { mark: ScoreMark } = $props();
   const targetBuilding = $derived(
     buildings.includes(mark.target as Building) ? (mark.target as Building) : null
   );
-  const icons: Record<string, string> = {
-    quarry: '⚒',
-    market: '▤',
-    temple: '▥',
-    barracks: '⚔',
-    library: '▧',
-    arch: '∩',
-    scroll: '▱',
-    banner: '⚑',
-    pairs: '▱⚑'
-  };
 </script>
 
 <span
   class="score-symbol {mark.shape}"
+  data-component="ScoreSymbol"
   aria-label="{mark.shape}: {scoreLabel(mark)}"
   title="{mark.shape}: {scoreLabel(mark)}"
-  ><b>{mark.multiplier}</b>{#if mark.target !== 'fixed'}<span class="divider">/</span
-    >{#if targetBuilding}<span class="target-building"
-        ><BuildingArt building={targetBuilding} /></span
-      >{:else}<span class="target">{icons[mark.target]}</span>{/if}{/if}<span class="shape-mark"
-    >{mark.shape === 'scroll' ? '▦' : '↔'}</span
-  ></span
 >
+  <img
+    class="plaque"
+    data-layer="score-material"
+    src={gameArt(`score-${mark.shape}`)}
+    alt=""
+    draggable="false"
+  />
+  <span class="score-ink"
+    ><b>{mark.multiplier}</b>{#if mark.target !== 'fixed'}<span class="divider">/</span><span
+        class="target"
+      >
+        {#if targetBuilding}<BuildingSymbol
+            building={targetBuilding}
+          />{:else if mark.target === 'scroll' || mark.target === 'banner' || mark.target === 'pairs'}<ScoreGlyph
+            shape={mark.target}
+          />{/if}
+      </span><svg
+        class="range"
+        viewBox="0 0 30 30"
+        aria-hidden="true"
+        data-scoring-range={mark.shape}
+      >
+        {#each [0, 1, 2] as y}{#each [0, 1, 2] as x}<rect
+              x={x * 10 + 1}
+              y={y * 10 + 1}
+              width="8"
+              height="8"
+              fill={mark.shape === 'scroll' || x === 1 || y === 1 ? 'currentColor' : 'none'}
+            />{/each}{/each}
+      </svg>{/if}</span
+  >
+</span>
 
 <style>
   .score-symbol {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    width: 94px;
+    height: 36px;
+    color: #30251a;
+    flex-shrink: 0;
+    isolation: isolate;
+  }
+  .plaque {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+  }
+  .score-ink {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     gap: 3px;
-    background: #fff6db;
-    border: 1.5px solid #7b5d3e;
-    color: #3d342a;
-    height: 23px;
-    padding: 0 5px;
-    min-width: 30px;
-    box-shadow: 0 1px 1px #0002;
-    white-space: nowrap;
-    font-family: 'Atkinson Hyperlegible', sans-serif;
-    font-size: 13px;
-    line-height: 1;
+    padding: 2px 9px 5px;
   }
-  .scroll {
-    border-inline: 4px double #9c7856;
-    border-radius: 3px;
-  }
-  .banner {
-    border-color: #475d66;
-    border-bottom: 4px double #475d66;
-    border-radius: 0 0 5px 5px;
+  b {
+    font:
+      700 19px/1 'Atkinson Hyperlegible',
+      sans-serif;
   }
   .target {
-    font-size: 13px;
-  }
-  .target-building {
-    width: 14px;
-    height: 13px;
     display: block;
-    border: 1px solid #60614a;
-    border-radius: 1px;
-    overflow: hidden;
+    width: 24px;
+    height: 24px;
   }
   .divider {
-    color: #998569;
-    font-size: 10px;
+    font-size: 15px;
   }
-  .shape-mark {
-    font-size: 10px;
-    color: #6e7566;
+  .range {
+    width: 18px;
+    height: 18px;
     margin-left: 1px;
   }
 </style>

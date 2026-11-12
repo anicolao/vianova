@@ -3,13 +3,24 @@
   let {
     kind,
     count,
+    disabled = false,
+    reason,
     onclick
-  }: { kind: 'dominos' | 'battle' | 'invention'; count: number; onclick?: () => void } = $props();
+  }: {
+    kind: 'dominos' | 'battle' | 'invention';
+    count: number;
+    disabled?: boolean;
+    reason?: string;
+    onclick?: () => void;
+  } = $props();
 </script>
 
 <div class="supply" data-component="SupplyDeck" data-anchor="supply-{kind}">
   <div class="deck">
-    <Tile back {onclick} /><span class="deck-count" class:empty={count === 0}>{count}</span>
+    <Tile back backKind={kind === 'dominos' ? 'domino' : kind} {disabled} {reason} {onclick} /><span
+      class="deck-count"
+      class:empty={count === 0}>{count}</span
+    >
   </div>
   <span class="deck-label"
     >{kind === 'dominos'
@@ -26,7 +37,7 @@
     flex-direction: column;
     align-items: center;
     gap: 8px;
-    --tile-size: 51px;
+    --tile-size: 96px;
   }
   .deck {
     position: relative;
@@ -59,5 +70,10 @@
     text-align: center;
     text-transform: uppercase;
     letter-spacing: 0.07em;
+  }
+
+  .deck-label,
+  .deck-count {
+    font-size: 14px;
   }
 </style>

@@ -17,9 +17,9 @@ The supplied v56 rules describe a game for **2–4 players**, ages **10+**, with
 
 ## Current status
 
-**Mosaic Forum (option 2) is the selected art direction.** A Svelte 5 / SvelteKit workshop now demonstrates the production-facing presentation components before rules implementation. The gallery contains 64 review samples spanning all component families and the illustrated scoring key. The animation lab has 15 scrub-able action studies, rendered through the same Svelte components in native mobile, tablet, desktop, and tabletop viewports.
+**Mosaic Forum (option 2) is the selected art direction.** A Svelte 5 / SvelteKit workshop now demonstrates the production-facing presentation components before rules implementation. The gallery shows the complete v56 tile inventory, setup allocations, component families and scoring key, built from layered generated mosaic artwork with shared monochrome building symbols. The animation lab has 15 scrub-able action studies, rendered through the same Svelte components in native mobile, tablet, desktop, and tabletop viewports.
 
-There is no rules engine, networking, or complete playable game yet. The standalone review routes support local placement, rotation, cancellation, inspection, and prepared action demonstrations. Component faces and setup values are representative fixtures pending Stefan's complete manifest.
+There is no rules engine, networking, or complete playable game yet. The standalone review routes use one shared presentation controller for specific-object selection, targeting, confirmation, cancellation, pending/error/retry, and inspection. A deterministic fixture adapter simulates outcomes; prepared studies are a separate mode. The [complete v56 manifest](COMPONENT_MANIFEST.md) comes from the designer’s print-and-play references; interactive and timeline fixtures remain explicitly simulated.
 
 ## Run the workshop
 

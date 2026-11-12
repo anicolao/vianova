@@ -16,6 +16,7 @@
   let dialog: HTMLDialogElement;
   let lastTrigger: HTMLElement | null = null;
   let dark = $state(true);
+  let monochrome = $state(false);
   const current = $derived(categories.find((c) => c.id === category)!);
   const visible = $derived(
     galleryItems.filter(
@@ -49,12 +50,12 @@
 <main class="work-main" inert={!hydrated}>
   <section class="page-heading">
     <div>
-      <div class="eyebrow">Mosaic Forum · Component collection 01</div>
+      <div class="eyebrow">Mosaic Forum · v56 physical collection</div>
       <h1>The pieces of a new Rome.</h1>
       <p>
-        A living collection of the tiles, people, and places that make Via Nova.<br
+        Stone, parchment, wood. The pieces of Via Nova, made to be handled.<br
           class="desktop-break"
-        /> Inspect a piece, then see it come to life in the animation lab.
+        /> Compare the symbols without colour, inspect the layers, then try the same pieces in play.
       </p>
     </div>
     <div class="collection-seal">
@@ -72,7 +73,7 @@
     <div>
       <strong>{galleryItems.length}</strong><span>review samples</span><span class="separator"
         >/</span
-      ><strong>6</strong><span>building families</span><span class="separator">/</span><span
+      ><strong>128</strong><span>physical tiles</span><span class="separator">/</span><span
         >Rules v56</span
       >
     </div>
@@ -83,6 +84,7 @@
       <span class="eyebrow">The collection</span>
       <nav aria-label="Component categories">
         {#each categories as c}<button
+            disabled={!hydrated}
             class:active={category === c.id && !query}
             onclick={() => {
               category = c.id;
@@ -109,6 +111,7 @@
         <label class="search"
           ><span aria-hidden="true">⌕</span><input
             type="search"
+            disabled={!hydrated}
             aria-label="Search components"
             placeholder="Find a component…"
             bind:value={query}
@@ -117,6 +120,12 @@
       </div>
       <div class="section-top">
         <p>{visible.length} samples · Select Inspect for full size and component details.</p>
+        <button
+          class="background-switch"
+          aria-pressed={monochrome}
+          onclick={() => (monochrome = !monochrome)}
+          >{monochrome ? 'Restore colour' : 'Compare without colour'}</button
+        >
         <button class="background-switch" aria-pressed={!dark} onclick={() => (dark = !dark)}
           >{dark ? '◑ Light backing' : '◐ Dark backing'}</button
         >
@@ -126,7 +135,7 @@
             class="component-card"
             class:wide={item.kind === 'board' || item.category === 'interface'}
           >
-            <div class="component-preview" class:light={!dark}>
+            <div class="component-preview" class:light={!dark} class:monochrome>
               <GalleryRenderer {item} /><span class="sample-id">{item.id}</span>
             </div>
             <div class="card-details">
@@ -152,9 +161,11 @@
   </div>
   <div class="review-notice">
     <b>Built for review.</b> These are the shared Svelte presentation components for future game
-    routes. Samples cover every component family and v56 scoring condition; exact tile-face
-    distributions and starting allocations still await Stefan’s component manifest.
-    <a href="https://github.com/anicolao/vianova/blob/main/RULES_SUMMARY.md">Rules notes ↗</a>
+    routes. The designer’s print-and-play manifest supplies every domino, rebuild face and starting
+    allocation. Generated artwork, shared building symbols, scoring plaques and live values are
+    separate production layers. Direct outcomes remain simulated. Two conflicting print-back entries
+    are documented in COMPONENT_MANIFEST.md.
+    <a href="https://github.com/anicolao/vianova/blob/feat/mosaic-component-gallery/COMPONENT_MANIFEST.md">Component manifest ↗</a>
   </div>
 </main>
 <footer class="work-footer">
@@ -374,9 +385,9 @@
   }
   .component-card {
     min-width: 0;
-    background: #fffbf2;
-    border: 1px solid #d9ceb7;
-    border-radius: 9px;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -386,9 +397,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(ellipse at 50% 35%, #345154, #17333f);
+    background: radial-gradient(ellipse at 50% 35%, #28474a, #102b34);
+    border-radius: 5px;
+    box-shadow: inset 0 0 30px #0004;
     position: relative;
     padding: 14px 0 27px;
+  }
+  .component-preview.monochrome :global(.renderer) {
+    filter: grayscale(1);
   }
   .component-preview.light {
     background: radial-gradient(ellipse, #f7ecd4, #e5d9bc);
@@ -609,7 +625,7 @@
       min-height: 175px;
     }
     .component-preview :global(.renderer) {
-      --tile-size: 82px;
+      --tile-size: 104px;
       padding: 10px;
     }
     .component-card.wide {

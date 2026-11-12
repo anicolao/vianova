@@ -6,11 +6,11 @@ The concepts were generated with the built-in image generation tool on 2026-11-1
 
 ## Shared visual requirements
 
-The style must support a city assembled from square spaces on dominos and single rebuild tiles. Preserve the rulebook's building colors: **yellow Quarry, orange Market, blue Temple, red Barracks, green Library, purple Arch**. Distinct silhouettes and small functional icons supplement color: cut stone/tool, market stall, classical temple, military building/shield, library/scroll, and freestanding arch. Keep player ownership separate through colored bases, seat symbols, and labels.
+The style must support a city assembled from square spaces on dominos and single rebuild tiles. Preserve the rulebook's building colors: **yellow Quarry, orange Market, blue Temple, red Barracks, green Library, purple Arch**. The designer’s symbols are primary identifiers: pickaxe, amphora, pedestal, crossed swords, open book, and arched gateway. The exact same symbol must be shown on each building and wherever a scroll, banner or action refers to that type. Colour supports these symbols. Keep player ownership separate through colored bases, seat symbols, and labels.
 
 Use clear Arabic 1 and 2 numerals for population. Reserve quiet, high-contrast panels for scoring, double-domino marks, + stacks, and Arch 3 or 2 2 2 marks. Scroll and banner shapes must remain distinguishable at phone scale. The player should recognize a building before studying its illustration.
 
-All concepts need the same functional layers: building art, square boundary, domino grouping, scoring panel, action marks, ownership, and selection/preview overlays. Generate illustrations as assets; build geometry, rules symbols, labels, numbers, and highlights as crisp interface elements. A flattened concept image must never become the game board.
+All concepts need the same functional layers: building art, square boundary, domino grouping, scoring panel, action marks, ownership, and selection/preview overlays. Use generated, rich raster artwork for physical pieces, boards, material and illustrations; build geometry, rules symbols, labels, numbers, and highlights as crisp interface elements. A flattened concept image must never become the game board.
 
 ## 1. Fresco Civitas
 
@@ -93,3 +93,12 @@ The component gallery and animation lab now provide the following review samples
 5. Phone portrait/landscape, laptop, tablet, and four-seat tabletop views using those same components.
 
 Review contrast, touch targets, color-independent recognition, symbol legibility, reduced motion, and actual tabletop viewing distance. Record the selected palette, font licenses, asset provenance, and any permissions for source materials before distributing production assets.
+
+
+## Production mosaic pass · 12 November 2026
+
+The initial markup illustration pass was rejected as insufficiently tactile. The replacement uses fourteen built-in imagegen assets: six coordinated stone mosaic building faces, a navy mosaic reverse, transparent rolled-scroll and tabbed-banner plaques, a transparent carved wooden meeple, two shared board substrates, a player mat and a recessed stone tray. Runtime layers are in [static/assets/mosaic](static/assets/mosaic/); exact briefs and original-generation provenance are in [art/mosaic/prompts.json](art/mosaic/prompts.json). The assets are optimized display derivatives; the original generation locations are recorded in the prompt ledger. No commissioned/source print illustrations were copied into the game art.
+
+The composition follows Pantheon’s art/material/live-ink separation and Hanami’s painted pieces with precise overlaid affordances. Richness belongs to physical form and broad material; it must not compete with icon recognition. The monochrome vector symbols deliberately follow the print-and-play semantics instead of miniature artwork or emoji. Scoring shape and footprint are redundant cues, not colour codes. Generated artwork is for review; aesthetic and icon recognition approval remains with the designer and project owner.
+
+Minimum-use briefs: building faces 96 px square; scoring plaques 94×36 px with 24 px target symbols; population 44×52 px interactive; boards roughly 340 px wide with locally panning reward areas. The gallery uses larger 128 px specimens but production routes retain the same layers. Review at actual phone/tabletop size and in grayscale before approval. Native hardware and viewing-distance review is still needed.

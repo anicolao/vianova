@@ -7,9 +7,9 @@ import {
   type Person,
   type SceneView,
   type TileData,
-  owners,
-  names
+  owners
 } from '../presentation/types';
+export const names = { teal: 'Aurelia', coral: 'Cassius', gold: 'Livia', lilac: 'Marcus' };
 export const tile = (
   building: Building,
   id: string = building,
@@ -105,6 +105,13 @@ export function fixture(): SceneView {
   });
   return {
     viewer: 'teal',
+    seats: [
+      { owner: 'teal', position: 'south' },
+      { owner: 'coral', position: 'east' },
+      { owner: 'gold', position: 'north' },
+      { owner: 'lilac', position: 'west' }
+    ],
+    rebuilds: [],
     city: cityFixture(),
     opponentCities: {
       coral: cityFixture().slice(0, 7),

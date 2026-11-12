@@ -1,14 +1,29 @@
 <script lang="ts">
+  import { gameArt } from '../presentation/art';
   import Domino from './Domino.svelte';
+  import type { ControlState } from '../presentation/controller';
   import type { DominoData } from '../presentation/types';
   let {
     dominos,
     onTake,
-    selected
-  }: { dominos: DominoData[]; onTake?: (id: string) => void; selected?: string | null } = $props();
+    selected,
+    availability,
+    disabled = false
+  }: {
+    dominos: DominoData[];
+    onTake?: (id: string) => void;
+    availability?: Record<string, ControlState>;
+    disabled?: boolean;
+    selected?: string | null;
+  } = $props();
 </script>
 
-<section class="domino-market" data-component="DominoMarket" aria-label="Domino market">
+<section
+  class="domino-market"
+  style:--tray-art={`url("${gameArt('piece-tray')}")`}
+  data-component="DominoMarket"
+  aria-label="Domino market"
+>
   <header>
     <span class="eyebrow">The market</span><span
       >Ⅱ = 2 actions <span class="dot">·</span> Refill at turn end</span
@@ -18,6 +33,8 @@
     {#each dominos as domino}<div data-anchor="market-{domino.id}">
         <Domino
           {domino}
+          disabled={disabled || (!!availability && !availability[domino.id]?.enabled)}
+          reason={availability?.[domino.id]?.reason}
           selected={selected === domino.id}
           onclick={onTake ? () => onTake(domino.id) : undefined}
         />
@@ -29,7 +46,7 @@
 
 <style>
   .domino-market {
-    --tile-size: 48px;
+    --tile-size: 96px;
     min-width: 0;
     color: #d9e0ce;
   }
@@ -76,7 +93,7 @@
   }
   @media (max-width: 600px) {
     .domino-market {
-      --tile-size: 43px;
+      --tile-size: 96px;
     }
     .domino-market header {
       gap: 8px;
@@ -87,5 +104,27 @@
     .dot {
       margin: 0 2px;
     }
+  }
+
+  .domino-market {
+    background: var(--tray-art) center/100% 100% no-repeat;
+    border: 0;
+    padding: 30px 24px 22px;
+    color: #2d3b32;
+    border-radius: 7px;
+    box-shadow:
+      0 4px 0 #605139,
+      0 7px 12px #0004;
+  }
+  .domino-market .eyebrow,
+  .domino-market header > span:last-child {
+    color: #3e4b3c;
+  }
+  .domino-market .eyebrow,
+  .domino-market header > span:last-child {
+    font-size: 14px;
+  }
+  .domino-market header {
+    flex-wrap: wrap;
   }
 </style>

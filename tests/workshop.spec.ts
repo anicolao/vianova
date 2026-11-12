@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { galleryItems, categories } from '../src/lib/review/catalog';
-import { scenarios } from '../src/lib/presentation/scenarios';
+import { scenarios } from '../src/lib/review/scenarios';
 const screenshot = async (page: Page, name: string) => {
   await page.screenshot({ path: `test-results/review/${name}.png`, fullPage: true });
 };
@@ -53,7 +53,11 @@ test('gallery is usable at phone width and starting selection counts marked valu
   await choices.nth(2).click();
   await expect(dialog.getByRole('button', { name: 'Keep selection' })).toBeEnabled();
   await dialog.getByRole('button', { name: 'Keep selection' }).click();
-  await expect(dialog.getByText('Kept 3 dominos in this local review.')).toBeVisible();
+  await dialog.getByRole('button', { name: 'Confirm choice', exact: true }).click();
+  await expect(
+    dialog.locator('[data-component="PrivateHand"] [data-component="Domino"]')
+  ).toHaveCount(3);
+  await expect(dialog.getByText(/Simulated: Kept starting dominos h0, h1, h2/)).toBeVisible();
 });
 test('lab timeline reaches every scene final state, reverses, and shows travelers', async ({
   page
@@ -66,8 +70,8 @@ test('lab timeline reaches every scene final state, reverses, and shows traveler
   for (const s of scenarios) {
     await page.locator('.scenario-group button').filter({ hasText: s.title }).click();
     await page.getByRole('button', { name: 'Jump to animation end' }).click();
-    await expect(frame.locator('[data-component="GameSurface"]')).toHaveAttribute(
-      'data-beat',
+    await expect(frame.locator('[data-study-beat]')).toHaveAttribute(
+      'data-study-beat',
       String(s.beats.length - 1)
     );
   }
@@ -76,9 +80,9 @@ test('lab timeline reaches every scene final state, reverses, and shows traveler
   await expect(frame.locator('[data-motion="recruit"]')).toBeVisible();
   await page.getByLabel('Animation timeline', { exact: true }).fill('0');
   await expect(frame.locator('[data-motion]')).toHaveCount(0);
-  await expect(frame.locator('[data-component="GameSurface"]')).toHaveAttribute('data-beat', '0');
+  await expect(frame.locator('[data-study-beat]')).toHaveAttribute('data-study-beat', '0');
   await page.getByRole('checkbox', { name: 'Reduced motion' }).check();
-  await expect(frame.locator('[data-component="GameSurface"]')).toHaveAttribute('data-beat', '1');
+  await expect(frame.locator('[data-study-beat]')).toHaveAttribute('data-study-beat', '1');
   await expect(frame.locator('[data-motion]')).toHaveCount(0);
   expect(errors).toEqual([]);
   await screenshot(page, 'lab-desktop');
@@ -113,13 +117,13 @@ test('direct review uses real placement, rotation, cancellation, commitment, and
   const hand = page.locator('[data-component="PrivateHand"]');
   await hand.locator('button[data-component="Domino"]').first().click();
   await expect(hand.locator('button[aria-pressed="true"]')).toHaveCount(1);
-  await page.getByRole('button', { name: 'Stage domino at column 5, row 5', exact: true }).click();
+  await page.getByRole('button', { name: 'Stage tile at x 4, y 4', exact: true }).click();
   await page.getByRole('button', { name: 'Rotate', exact: false }).click();
   await page.getByRole('button', { name: 'Cancel', exact: true }).click();
   await expect(hand.locator('button[aria-pressed="true"]')).toHaveCount(0);
   await hand.locator('button[data-component="Domino"]').first().click();
   await expect(hand.locator('button[aria-pressed="true"]')).toHaveCount(1);
-  await page.getByRole('button', { name: 'Stage domino at column 5, row 5', exact: true }).click();
+  await page.getByRole('button', { name: 'Stage tile at x 4, y 4', exact: true }).click();
   await page.getByRole('button', { name: 'Place here ✓' }).click();
   await expect(hand.locator('[data-component="Domino"]')).toHaveCount(2);
   await expect(page.locator('[data-cell="4,4"] [data-component="Tile"]')).toHaveAttribute(
@@ -169,11 +173,13 @@ test('tabletop positions stay inside the 1080p surface and city motion anchors i
       return { left: r.left, right: r.right, top: r.top, bottom: r.bottom };
     })
   );
+  await screenshot(page, 'tabletop-native');
   for (const seat of seats) {
     expect(seat.left).toBeGreaterThanOrEqual(0);
     expect(seat.right).toBeLessThanOrEqual(1920);
+    expect(seat.top).toBeGreaterThanOrEqual(54);
+    expect(seat.bottom).toBeLessThanOrEqual(1080);
   }
-  await screenshot(page, 'tabletop-native');
 });
 test('interacting with the iframe pauses the lab clock and preserves the selection', async ({
   page
@@ -202,5 +208,5 @@ test('tabletop projection supports two, three, and four players without inventin
     ).toHaveCount(0);
   }
   await page.getByRole('button', { name: 'Jump to animation end' }).click();
-  await expect(frame.locator('[data-component="GameSurface"]')).toHaveAttribute('data-beat', '2');
+  await expect(frame.locator('[data-study-beat]')).toHaveAttribute('data-study-beat', '2');
 });

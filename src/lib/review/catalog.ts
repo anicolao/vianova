@@ -1,3 +1,4 @@
+import { gameDominos, startingDominos, battleTiles, inventionTiles } from '../manifest';
 import {
   buildings,
   owners,
@@ -7,7 +8,17 @@ import {
   type ScoreMark
 } from '../presentation/types';
 import { tile, domino, person } from './fixtures';
-export type Category = 'buildings' | 'dominos' | 'population' | 'scoring' | 'boards' | 'interface';
+export type Category =
+  | 'buildings'
+  | 'dominos'
+  | 'population'
+  | 'scoring'
+  | 'boards'
+  | 'interface'
+  | 'inventory-dominos'
+  | 'inventory-battle'
+  | 'inventory-invention'
+  | 'setup';
 export type GalleryItem = {
   id: string;
   title: string;
@@ -20,8 +31,29 @@ export type GalleryItem = {
   person?: Person;
   mark?: ScoreMark;
   variant?: string;
+  setupOrder?: number;
 };
 export const categories: { id: Category; name: string; subtitle: string }[] = [
+  {
+    id: 'inventory-dominos',
+    name: '48 game dominos',
+    subtitle: 'Every physical domino, in designer workbook order.'
+  },
+  {
+    id: 'inventory-battle',
+    name: '26 Battle rebuilds',
+    subtitle: 'Every Battle front, including ten + tiles.'
+  },
+  {
+    id: 'inventory-invention',
+    name: '22 Invention rebuilds',
+    subtitle: 'Every Invention front, including four + tiles.'
+  },
+  {
+    id: 'setup',
+    name: 'Starting components',
+    subtitle: 'A/B/C copies, exact six-space city and turn-order allocations.'
+  },
   {
     id: 'buildings',
     name: 'Buildings & Arches',
@@ -54,6 +86,75 @@ export const categories: { id: Category; name: string; subtitle: string }[] = [
   }
 ];
 export const galleryItems: GalleryItem[] = [
+  ...gameDominos.map(
+    (d): GalleryItem => ({
+      id: d.id,
+      title: `Domino ${d.source.index} · ${d.tiles.map((t) => t.building).join(' / ')}`,
+      category: 'inventory-dominos',
+      kind: 'domino',
+      renderer: 'Domino → Tile → BuildingArt + BuildingSymbol',
+      domino: d,
+      description: `${d.double ? 'Marked · costs 2' : 'Unmarked · costs 1'}. Physical copy ${d.source.index}/48. Workbook dominos row ${d.source.row}; PDF p${d.source.page}, row ${d.source.gridRow}, column ${d.source.gridColumn}.`
+    })
+  ),
+  ...[...battleTiles, ...inventionTiles].map(
+    (t): GalleryItem => ({
+      id: t.id,
+      title: `${t.back === 'battle' ? 'Battle' : 'Invention'} ${t.id.slice(-2)} · ${t.building}${t.plus ? ' +' : ''}`,
+      category: t.back === 'battle' ? 'inventory-battle' : 'inventory-invention',
+      kind: 'tile',
+      renderer: 'Tile → BuildingArt + BuildingSymbol + ScoreSymbol',
+      tile: t,
+      description: `Physical tile · ${t.score?.shape}. Workbook single tiles row ${t.source.row}; PDF p${t.source.page}, row ${t.source.gridRow}, column ${t.source.gridColumn}.${t.source.row === 47 || t.source.row === 51 ? ' Conflicting print-back metadata documented in manifest.' : ''}`
+    })
+  ),
+  ...(['A', 'B', 'C'] as const).flatMap((letter) => {
+    const copies = startingDominos.filter((d) => d.back === `start-${letter}`);
+    return [false, true].map(
+      (back): GalleryItem => ({
+        id: `start-${letter}${back ? '-back' : ''}`,
+        title: `Starting ${letter}${back ? ' reverse' : ' front'} · 4 copies`,
+        category: 'setup',
+        kind: 'domino',
+        renderer: 'Domino → Tile',
+        domino: copies[0],
+        variant: back ? 'back' : undefined,
+        description: `${copies.map((d) => d.id).join(', ')}. ${copies[0].tiles.map((t) => t.building).join(' / ')}. Source dominos rows ${copies[0].source.row}–${copies.at(-1)!.source.row}. Arrows show assembly corners.`
+      })
+    );
+  }),
+  {
+    id: 'starting-city',
+    title: 'Exact starting city',
+    category: 'setup',
+    kind: 'board',
+    renderer: 'CityBoard → Tile',
+    variant: 'starting-city',
+    description:
+      'Rules p3: A Quarry/Market at (0,3)/(1,3); B Barracks/Library at (2,2)/(2,1); C Market/Quarry at (3,0)/(4,0). Four copies of this six-space layout.'
+  },
+  ...[1, 2, 3, 4].map(
+    (n): GalleryItem => ({
+      id: `setup-board-${n}`,
+      title: `Turn order ${n} setup`,
+      category: 'setup',
+      kind: 'board',
+      renderer: 'PlayerMat',
+      setupOrder: n,
+      variant: owners[n - 1],
+      description: `${[2, 3, 4, 4][n - 1]} Soldiers; ${[3, 3, 3, 4][n - 1]} Engineers; ${[7, 6, 5, 4][n - 1]} reserve; one population in each of four areas; five Arches. All population begins value 1. Board order is independent of colour.`
+    })
+  ),
+  ...(['battle', 'invention'] as const).map((kind) => ({
+    id: `${kind}-back`,
+    title: `${kind} reverse`,
+    category: 'dominos' as const,
+    kind: 'tile' as const,
+    renderer: 'Tile',
+    variant: `${kind}-back`,
+    description:
+      'Distinct supply symbol on a generated navy mosaic reverse. Logical back follows the manifest, including documented print-file discrepancies.'
+  })),
   ...buildings.map(
     (b): GalleryItem => ({
       id: `building-${b}`,
@@ -64,7 +165,7 @@ export const galleryItems: GalleryItem[] = [
       description:
         b === 'arch'
           ? 'Purple · permanent · cannot be covered.'
-          : 'Distinct silhouette, color field, and building name.',
+          : 'Generated mosaic building, tactile stone edge and shared monochrome identity symbol.',
       tile: tile(b, `building-${b}`)
     })
   ),
@@ -119,27 +220,6 @@ export const galleryItems: GalleryItem[] = [
         ? 'Two market actions; one hand slot.'
         : 'Two connected building spaces; rotate together.',
       domino: d
-    })
-  ),
-  ...(['A', 'B', 'C'] as const).map(
-    (letter, i): GalleryItem => ({
-      id: `start-${letter}`,
-      title: `Starting tile ${letter}`,
-      category: 'dominos',
-      kind: 'domino',
-      renderer: 'Domino → Tile',
-      description: 'Dotted edge and start label. Exact start layout awaits component manifest.',
-      domino: {
-        id: `start-${letter}`,
-        tiles: [
-          tile((['quarry', 'library', 'market'] as const)[i], `start-${letter}-0`, {
-            start: letter
-          }),
-          tile((['market', 'barracks', 'quarry'] as const)[i], `start-${letter}-1`, {
-            start: letter
-          })
-        ]
-      }
     })
   ),
   {

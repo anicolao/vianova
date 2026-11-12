@@ -3,12 +3,6 @@ export const buildings = ['quarry', 'market', 'temple', 'barracks', 'library', '
 export type Building = (typeof buildings)[number];
 export type Owner = 'teal' | 'coral' | 'gold' | 'lilac';
 export const owners: Owner[] = ['teal', 'coral', 'gold', 'lilac'];
-export const names: Record<Owner, string> = {
-  teal: 'Aurelia',
-  coral: 'Cassius',
-  gold: 'Livia',
-  lilac: 'Marcus'
-};
 export const buildingInfo: Record<Building, { name: string; action: string; color: string }> = {
   quarry: { name: 'Quarry', action: 'Take a domino', color: '#d8b64b' },
   market: { name: 'Market', action: 'Create a Soldier or Engineer', color: '#db8c40' },
@@ -29,6 +23,7 @@ export type TileData = {
   arch?: '3' | '222';
   plus?: boolean;
   start?: 'A' | 'B' | 'C';
+  startCorner?: 'top-right' | 'bottom-left';
 };
 export type DominoData = { id: string; tiles: [TileData, TileData]; double?: boolean };
 export type Cell = { x: number; y: number; tile: TileData; covered?: TileData };
@@ -76,48 +71,39 @@ export type SceneView = {
   supplies: [number, number, number];
   log: string[];
   final?: boolean;
+  seats: { owner: Owner; position: 'north' | 'south' | 'east' | 'west' }[];
+  rebuilds?: TileData[];
+  startingDominos?: DominoData[];
 };
-export type MotionCue = {
+export type GeneratedAction = {
+  id: string;
+  building: Building;
+  count: number;
+  available: boolean;
+  reason?: string;
+};
+export type MotionSprite = {
   id: string;
   kind: 'tile' | 'person';
   tile?: TileData;
   person?: Person;
   from: string;
   to: string;
-  start: number;
-  end: number;
   label: string;
-};
-export type Beat = {
-  at: number;
-  label: string;
-  detail: string;
-  focus?: Focus;
-  patch?: (view: SceneView) => void;
-};
-export type Scenario = {
-  id: string;
-  group: string;
-  title: string;
-  description: string;
-  duration: number;
-  beats: Beat[];
-  motions: MotionCue[];
-  fixture: () => SceneView;
-};
-export type Frame = {
-  sceneId: string;
-  context: 'city' | 'population' | 'contests';
-  actions?: { id: string; building: Building; count: number; available: boolean }[];
-  ordered?: boolean;
-  view: SceneView;
-  focus: Focus;
-  beat: number;
-  label: string;
-  detail: string;
-  motions: (MotionCue & { progress: number })[];
   progress: number;
 };
+/** Settled presentation plus optional sampled motion. No scenario IDs, beats or clock. */
+export type GamePresentation = {
+  view: SceneView;
+  focus: Focus;
+  actions?: GeneratedAction[];
+  ordered?: boolean;
+  context: 'city' | 'population' | 'contests';
+  label: string;
+  detail: string;
+  motions: MotionSprite[];
+};
+export const ownerSymbols: Record<Owner, string> = { teal: '◆', coral: '●', gold: '▲', lilac: '✦' };
 export const cellKey = (x: number, y: number) => `${x},${y}`;
 export function scoreLabel(mark: ScoreMark) {
   const target =

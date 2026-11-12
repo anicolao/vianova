@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { getScenario, sample, scenarios } from './scenarios';
 import { galleryItems } from '../review/catalog';
 import { fixture } from '../review/fixtures';
-import { owners } from './types';
+import { owners } from '../presentation/types';
 describe('presentation timeline', () => {
   it('supports exact reverse seeking without accumulating patches', () => {
     for (const s of scenarios) {
@@ -84,6 +84,24 @@ it('keeps all physical meeples in the contest resolution fixture', () => {
           p.engineers.length +
           v.areas.flatMap((a) => a.people).filter((p) => p.owner === owner).length
       ).toBe(16);
+    }
+  }
+});
+it('keeps every physical meeple identity stable and unique across prepared study beats', () => {
+  for (const study of scenarios) {
+    const original = study.fixture();
+    const ids = (v: typeof original) =>
+      v.players
+        .flatMap((player) =>
+          [...player.reserve, ...player.soldiers, ...player.engineers].map((p) => p.id)
+        )
+        .concat(v.areas.flatMap((a) => a.people.map((p) => p.id)))
+        .sort();
+    const before = ids(original);
+    for (const time of [...study.beats.map((b) => b.at), study.duration]) {
+      const after = ids(sample(study, time).view);
+      expect(new Set(after).size).toBe(after.length);
+      expect(after).toEqual(before);
     }
   }
 });

@@ -8,51 +8,153 @@
   import TurnControls from './TurnControls.svelte';
   import SupplyDeck from './SupplyDeck.svelte';
   import GameLog from './GameLog.svelte';
-  import ScoreSheet from './ScoreSheet.svelte';
+  import ScoringReview from './ScoringReview.svelte';
   import MotionLayer from './MotionLayer.svelte';
-  import { type Frame } from '../presentation/types';
+  import InteractionPanel from './InteractionPanel.svelte';
+  import StartingChoice from './StartingChoice.svelte';
+  import { ownerSymbols, type Owner, type PlayerView } from '../presentation/types';
+  import type { ControllerSnapshot } from '../presentation/controller';
   import type { ViewIntent } from '../presentation/intents';
   let {
-    frame,
+    snapshot,
     tabletop = false,
-    selectedDomino = null,
-    selectedCell = null,
-    staged = null,
-    rotation = 0,
     onIntent
   }: {
-    frame: Frame;
+    snapshot: ControllerSnapshot;
     tabletop?: boolean;
-    selectedDomino?: string | null;
-    selectedCell?: string | null;
-    staged?: { x: number; y: number } | null;
-    rotation?: number;
-    onIntent?: (intent: ViewIntent) => void;
+    onIntent: (intent: ViewIntent) => void;
   } = $props();
-  let surface = $state<HTMLElement>();
-  let tab = $state('city');
-  let details = $state(false);
-  const view = $derived(frame.view);
-  const active = $derived(view.players.find((p) => p.owner === view.active)!);
-  const viewer = $derived(view.players.find((p) => p.owner === view.viewer)!);
+  let surface = $state<HTMLElement>(),
+    tab = $state('city'),
+    details = $state(false);
+  const p = $derived(snapshot.presentation),
+    view = $derived(p.view),
+    a = $derived(snapshot.availability),
+    i = $derived(snapshot.interaction),
+    selection = $derived(i.selection);
+  const active = $derived(view.players.find((player) => player.owner === view.active)!),
+    viewer = $derived(view.players.find((player) => player.owner === view.viewer)!);
+  const context = $derived(
+    (selection?.kind === 'person' && selection.operation === 'deploy') ||
+      selection?.kind === 'resolve'
+      ? 'contests'
+      : p.context
+  );
   $effect(() => {
-    tab = frame.context === 'contests' ? 'contests' : 'city';
+    tab = context === 'contests' ? 'contests' : 'city';
   });
-  const chosen = $derived(view.hand.find((d) => d.id === selectedDomino));
-  const stage = $derived(chosen && staged ? { ...staged, domino: chosen } : null);
-  const send = (intent: ViewIntent) => onIntent?.(intent);
-  const northPlayer = $derived(view.players.length === 2 ? view.players[1] : view.players[2]);
-  const eastPlayer = $derived(view.players.length > 2 ? view.players[1] : undefined);
-  const westPlayer = $derived(view.players[3]);
+  const chosen = $derived(
+    selection?.kind === 'place' ? view.hand.find((d) => d.id === selection.id) : undefined
+  );
+  const stage = $derived(
+    selection?.kind === 'place' && selection.at
+      ? { ...selection.at, domino: chosen }
+      : selection?.kind === 'arch'
+        ? selection.at
+        : null
+  );
+  const rotation = $derived(
+    selection?.kind === 'place' || selection?.kind === 'arch' ? selection.rotation : 0
+  );
+  const canStage = $derived(selection?.kind === 'place' || selection?.kind === 'arch');
+  const deployment = $derived(selection?.kind === 'person' && selection.operation === 'deploy');
+  const selectedArea = $derived(
+    selection?.kind === 'resolve' || selection?.kind === 'person' ? selection.area : undefined
+  );
+  const activeSeat = $derived(view.seats.find((seat) => seat.owner === view.active)?.position);
+  const cityFor = (owner: Owner) =>
+    owner === view.viewer ? view.city : (view.opponentCities[owner] ?? []);
+  const send = (intent: ViewIntent) => onIntent(intent);
 </script>
 
+{#snippet mat(player: PlayerView, compact = false)}<PlayerMat
+    {player}
+    {compact}
+    active={player.owner === view.active}
+    selectedPerson={selection?.kind === 'person' ? selection.id : undefined}
+    availability={a.people}
+    disabled={snapshot.pending}
+    onPerson={(group, id) => send({ type: 'person', owner: player.owner, group, id })}
+  />{/snippet}
+{#snippet city(owner: Owner, compact = false)}<CityBoard
+    cells={cityFor(owner)}
+    {compact}
+    anchorPrefix={owner === view.viewer ? 'city' : `city-${owner}`}
+    focus={owner === view.viewer ? p.focus : {}}
+    selected={i.inspector?.owner === owner
+      ? `${i.inspector.x},${i.inspector.y}`
+      : selection?.kind === 'rebuild' && selection.at
+        ? `${selection.at.x},${selection.at.y}`
+        : null}
+    staged={owner === view.viewer ? stage : null}
+    archTile={selection?.kind === 'arch'
+      ? { id: 'arch-preview', building: 'arch', arch: '222' }
+      : undefined}
+    {rotation}
+    disabled={snapshot.pending}
+    onSelect={(cell) =>
+      send(
+        owner === view.viewer && selection?.kind === 'rebuild'
+          ? { type: 'target-cell', x: cell.x, y: cell.y }
+          : { type: 'inspect-cell', owner, x: cell.x, y: cell.y }
+      )}
+    onPlace={owner === view.viewer && canStage
+      ? (x, y) => send({ type: 'stage', x, y })
+      : undefined}
+  />{/snippet}
+{#snippet contest(kind: 'battle' | 'invention', compact = false)}<ContestBoard
+    {kind}
+    {compact}
+    areas={view.areas.filter((area) => area.kind === kind)}
+    availability={a.areas}
+    rewardAvailability={a.rewards}
+    disabled={snapshot.pending}
+    {selectedArea}
+    selectedReward={selection?.kind === 'resolve' ? selection.reward : undefined}
+    targeting={deployment}
+    onResolve={(area) => send({ type: deployment ? 'select-area' : 'resolve', area })}
+    onReward={(area, reward) => send({ type: 'select-reward', area, reward })}
+  />{/snippet}
+{#snippet market()}<DominoMarket
+    dominos={view.market}
+    availability={a.market}
+    disabled={snapshot.pending}
+    selected={selection?.kind === 'market' ? selection.id : null}
+    onTake={(id) => send({ type: 'take-market', id })}
+  />{/snippet}
+{#snippet supplies()}
+  {#each ['dominos', 'battle', 'invention'] as const as kind, index}<SupplyDeck
+      {kind}
+      count={view.supplies[index]}
+      disabled={snapshot.pending || !a.draw.enabled}
+      reason={a.draw.reason}
+      onclick={kind === 'dominos' ? () => send({ type: 'draw' }) : undefined}
+    />{/each}{/snippet}
+{#snippet controls()}{#if p.actions?.length}<ActionQueue
+      actions={p.actions.map((action) => ({
+        ...action,
+        available: a.queue[action.id]?.enabled ?? false,
+        reason: a.queue[action.id]?.reason
+      }))}
+      ordered={p.ordered}
+      selected={i.selectedAction}
+      disabled={snapshot.pending}
+      skipAvailable={a.skip.enabled}
+      onChoose={(action) => send({ type: 'choose-action', action })}
+      onSkip={() => send({ type: 'skip-actions' })}
+    />{/if}<TurnControls
+    selected={i.selectedAction}
+    availability={a.turn}
+    disabled={snapshot.pending}
+    onAction={(action) => send({ type: 'choose-action', action })}
+  />{/snippet}
 <section
   class="game-surface"
   class:tabletop
   bind:this={surface}
   data-component="GameSurface"
   data-active={view.active}
-  data-beat={frame.beat}
+  aria-busy={snapshot.pending}
 >
   <header class="surface-heading">
     <button class="game-wordmark" onclick={() => (tab = 'city')}>VIA NOVA</button><span
@@ -67,230 +169,132 @@
       <p>Public cities and contests stay on the table. Unplayed dominos stay private.</p>
       <button class="control" onclick={() => (details = false)}>Close details</button>
     </div>{/if}
-  {#if tabletop}
-    <div class="tabletop-layout">
-      {#if northPlayer}<div class="seated-city north">
-          <PlayerMat
-            player={northPlayer}
-            active={view.active === northPlayer.owner}
-            compact
-          /><CityBoard
-            cells={view.opponentCities[northPlayer.owner] ?? []}
-            anchorPrefix="city-{northPlayer.owner}"
-            compact
-          />
-        </div>
-      {/if}
-      {#if westPlayer}<div class="seated-city west">
-          <PlayerMat
-            player={westPlayer}
-            active={view.active === westPlayer.owner}
-            compact
-          /><CityBoard
-            cells={view.opponentCities[westPlayer.owner] ?? []}
-            anchorPrefix="city-{westPlayer.owner}"
-            compact
-          />
-        </div>
-      {/if}
-      <div class="shared-center">
-        <div class="table-contests">
-          <ContestBoard
-            kind="battle"
-            areas={view.areas.filter((a) => a.kind === 'battle')}
-            compact
-            onResolve={(area) => send({ type: 'resolve', area })}
-            onReward={(area, reward) => send({ type: 'select-reward', area, reward })}
-          /><ContestBoard
-            kind="invention"
-            areas={view.areas.filter((a) => a.kind === 'invention')}
-            compact
-            onResolve={(area) => send({ type: 'resolve', area })}
-            onReward={(area, reward) => send({ type: 'select-reward', area, reward })}
-          />
-        </div>
-        <div class="table-resources">
-          <DominoMarket dominos={view.market} onTake={(id) => send({ type: 'take-market', id })} />
-          <div class="table-supplies">
-            {#each ['dominos', 'battle', 'invention'] as const as kind, i}<SupplyDeck
-                {kind}
-                count={view.supplies[i]}
-                onclick={kind === 'dominos' ? () => send({ type: 'draw' }) : undefined}
-              />{/each}
-          </div>
-        </div>
-        <div class="turn-message" aria-live="polite">
-          <strong>{frame.label}</strong>
-          <p>{frame.detail}</p>
-        </div>
-        {#if frame.actions}<ActionQueue
-            actions={frame.actions}
-            ordered={frame.ordered}
-            onChoose={(action) => send({ type: 'choose-action', action })}
-          />{/if}
-        <div
-          class="shared-actions"
-          class:face-north={view.active === northPlayer?.owner}
-          class:face-east={view.active === 'coral'}
-          class:face-west={view.active === 'lilac'}
-        >
-          <TurnControls
-            selected={undefined}
-            staged={!!stage}
-            onAction={(action) => send({ type: 'choose-action', action })}
-            onRotate={() => send({ type: 'rotate' })}
-            onCancel={() => send({ type: 'cancel' })}
-            onCommit={() => send({ type: 'commit' })}
-          />
-        </div>
-        <PrivateHand dominos={view.hand} privateView={false} />
-      </div>
-      {#if eastPlayer}<div class="seated-city east">
-          <PlayerMat
-            player={eastPlayer}
-            active={view.active === eastPlayer.owner}
-            compact
-          /><CityBoard
-            cells={view.opponentCities[eastPlayer.owner] ?? []}
-            anchorPrefix="city-{eastPlayer.owner}"
-            compact
-          />
-        </div>
-      {/if}
-      <div class="seated-city south">
-        <PlayerMat
-          player={viewer}
-          active={view.active === viewer.owner}
-          compact
-          onPerson={(group, id) => send({ type: 'person', group, id })}
-        /><CityBoard
-          cells={view.city}
-          compact
-          focus={frame.focus}
-          selected={selectedCell}
-          staged={stage}
-          {rotation}
-          onSelect={(cell) => send({ type: 'inspect-cell', cell })}
-          onPlace={(x, y) => send({ type: 'stage', x, y })}
-        />
-      </div>
-    </div>
-  {:else}
-    <nav class="mobile-tabs" aria-label="Game views">
+  {#if !tabletop}<nav class="mobile-tabs" aria-label="Game views">
       {#each [['city', 'Your city'], ['contests', 'Contests'], ['players', 'Players']] as [id, label]}<button
           class:current={tab === id}
           aria-pressed={tab === id}
           onclick={() => (tab = id)}
-          >{label}{#if id === 'contests'}<small>4</small>{/if}</button
+          >{label}{#if id === 'contests'}<small>{view.areas.length}</small>{/if}</button
         >{/each}
-    </nav>
-    <div class="personal-layout">
+    </nav>{/if}
+  <div class="interaction-dock"><InteractionPanel {snapshot} onIntent={send} /></div>
+  {#if tabletop}<div class="tabletop-layout">
+      {#each view.seats as seat}{@const player = view.players.find(
+          (player) => player.owner === seat.owner
+        )}{#if player}<div class="seated-city {seat.position}">
+            {@render mat(player, true)}{@render city(player.owner, true)}
+          </div>{/if}{/each}
+      <!-- svelte-ignore a11y_no_noninteractive_tabindex (Shared table region pans without shrinking game pieces.) -->
+      <div
+        class="shared-center"
+        role="region"
+        tabindex="0"
+        aria-label="Shared boards, market and actions"
+      >
+        <span class="table-pan-hint">Shared table · scroll for market and actions</span>
+        <div class="table-contests">
+          {@render contest('battle', true)}{@render contest('invention', true)}
+        </div>
+        <div class="table-resources">
+          {@render market()}
+          <div class="table-supplies">{@render supplies()}</div>
+        </div>
+        <div class="turn-message" aria-live="polite">
+          <strong>{p.label}</strong>
+          <p>{p.detail}</p>
+        </div>
+        <div class="shared-actions" class:face-north={activeSeat === 'north'}>
+          {@render controls()}
+        </div>
+        <PrivateHand dominos={view.hand} privateView={false} />
+      </div>
+    </div>{:else}<div class="personal-layout">
       <aside class="player-column" class:mobile-visible={tab === 'players'}>
         <div class="column-title">
           <span class="eyebrow">Citizens of Rome</span><span>{view.players.length} cities</span>
         </div>
-        {#each view.players as player}<PlayerMat
-            {player}
-            active={player.owner === view.active}
-            compact={player.owner !== view.active}
-            onPerson={player.owner === view.active
-              ? (group, id) => send({ type: 'person', group, id })
-              : undefined}
-          />{/each}
+        {#each view.players as player}{@render mat(player, player.owner !== view.viewer)}{/each}
       </aside>
       <main class="city-column" class:mobile-visible={tab === 'city'} id="city">
         <div class="city-title">
           <div>
-            <span class="eyebrow">{viewer.name} · ◆</span>
+            <span class="eyebrow">{viewer.name} · {ownerSymbols[viewer.owner]}</span>
             <h1>Your city, rising</h1>
           </div>
           <span class="city-seal">SPQR</span>
         </div>
-        {#if frame.context === 'population'}<div class="mobile-context">
-            <PlayerMat
-              player={viewer}
-              compact
-              onPerson={(group, id) => send({ type: 'person', group, id })}
-            />
+        {#if context === 'population'}<div class="mobile-context">
+            {@render mat(viewer, true)}
           </div>{/if}
-        {#if view.final}<ScoreSheet
+        {#if view.final}<ScoringReview
             rows={view.scores}
-            onInspect={() => send({ type: 'inspect-score' })}
-          />{:else}<CityBoard
             cells={view.city}
-            focus={frame.focus}
-            selected={selectedCell}
-            staged={stage}
-            {rotation}
-            onSelect={(cell) => send({ type: 'inspect-cell', cell })}
-            onPlace={(x, y) => send({ type: 'stage', x, y })}
-          />{/if}
+            open={i.scoring}
+            focus={p.focus}
+            onToggle={() => send({ type: 'inspect-score' })}
+            onSelect={(cell) =>
+              send({ type: 'inspect-cell', owner: view.viewer, x: cell.x, y: cell.y })}
+          />{:else}{@render city(view.viewer)}{/if}
         <div class="turn-message" aria-live="polite">
-          <span class="message-icon">{stage ? '↻' : '◇'}</span>
+          <span class="message-icon">◇</span>
           <div>
-            <strong>{stage ? 'Review your placement' : frame.label}</strong>
-            <p>{stage ? 'Rotate the staged domino or place it here.' : frame.detail}</p>
+            <strong>{p.label}</strong>
+            <p>{p.detail}</p>
           </div>
         </div>
-        {#if frame.actions}<ActionQueue
-            actions={frame.actions}
-            ordered={frame.ordered}
-            onChoose={(action) => send({ type: 'choose-action', action })}
-          />{/if}
-        <TurnControls
-          selected={undefined}
-          staged={!!stage}
-          onAction={(action) => send({ type: 'choose-action', action })}
-          onRotate={() => send({ type: 'rotate' })}
-          onCancel={() => send({ type: 'cancel' })}
-          onCommit={() => send({ type: 'commit' })}
-        />
+        {@render controls()}
         <PrivateHand
           dominos={view.hand}
-          selected={selectedDomino}
+          availability={a.hands}
+          disabled={snapshot.pending}
+          selected={selection?.kind === 'place' ? selection.id : null}
           onSelect={(id) => send({ type: 'select-domino', id })}
         />
-        <GameLog entries={view.log} />
+        {#if view.startingDominos}<StartingChoice
+            selectedIds={i.startingIds}
+            selectionValue={a.startingValue}
+            canKeep={a.startingKeep.enabled}
+            onToggle={(id) => send({ type: 'toggle-starting', id })}
+            dominos={view.startingDominos}
+            disabled={snapshot.pending}
+            onKeep={(ids) => send({ type: 'keep-starting', ids })}
+          />{/if}<GameLog entries={view.log} />
       </main>
       <aside class="contest-column" class:mobile-visible={tab === 'contests'}>
-        <div class="mobile-context">
-          <PlayerMat
-            player={viewer}
-            compact
-            onPerson={(group, id) => send({ type: 'person', group, id })}
-          />
-        </div>
+        <div class="mobile-context">{@render mat(viewer, true)}</div>
         <div class="column-title">
           <span class="eyebrow">Shared opportunities</span><span>3+ to qualify</span>
         </div>
-        <ContestBoard
-          kind="battle"
-          areas={view.areas.filter((a) => a.kind === 'battle')}
-          onResolve={(area) => send({ type: 'resolve', area })}
-          onReward={(area, reward) => send({ type: 'select-reward', area, reward })}
-        /><ContestBoard
-          kind="invention"
-          areas={view.areas.filter((a) => a.kind === 'invention')}
-          onResolve={(area) => send({ type: 'resolve', area })}
-          onReward={(area, reward) => send({ type: 'select-reward', area, reward })}
-        />
-        <div class="supplies">
-          {#each ['dominos', 'battle', 'invention'] as const as kind, i}<SupplyDeck
-              {kind}
-              count={view.supplies[i]}
-              onclick={kind === 'dominos' ? () => send({ type: 'draw' }) : undefined}
-            />{/each}
-        </div>
+        {@render contest('battle')}{@render contest('invention')}
+        <div class="supplies">{@render supplies()}</div>
       </aside>
-      <div class="market-row">
-        <DominoMarket dominos={view.market} onTake={(id) => send({ type: 'take-market', id })} />
-      </div>
-    </div>
-  {/if}
-  <MotionLayer motions={frame.motions} {surface} />
+      <div class="market-row">{@render market()}</div>
+    </div>{/if}
+  <MotionLayer motions={p.motions} {surface} />
 </section>
 
 <style>
+  .interaction-dock {
+    padding: 12px 24px 0;
+    max-width: 1000px;
+    margin: auto;
+  }
+  .interaction-dock:empty {
+    display: none;
+  }
+  .tabletop .interaction-dock {
+    position: absolute;
+    top: 48%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 25;
+    width: min(760px, 54vw);
+    max-height: 48svh;
+    overflow: auto;
+  }
+  .tabletop .seated-city :global(.city-scroll) {
+    max-height: 235px;
+  }
   .game-surface {
     min-height: var(--surface-height, 100svh);
     background: radial-gradient(ellipse at 50% 25%, #2a4748, #152f3b 75%);
@@ -491,7 +495,7 @@
     margin: auto;
   }
   .seated-city :global(.city-board) {
-    --tile-size: 50px;
+    --tile-size: 104px;
   }
   .seated-city {
     display: flex;
@@ -523,14 +527,14 @@
   .west {
     grid-column: 1;
     grid-row: 2;
-    transform: rotate(90deg) scale(0.86);
+    transform: rotate(90deg);
     max-width: 260px;
     justify-self: center;
   }
   .east {
     grid-column: 3;
     grid-row: 2;
-    transform: rotate(-90deg) scale(0.86);
+    transform: rotate(-90deg);
     max-width: 260px;
     justify-self: center;
   }
@@ -563,7 +567,7 @@
     flex-shrink: 0;
   }
   .table-resources :global(.domino-market) {
-    --tile-size: 40px;
+    --tile-size: 104px;
   }
   .tabletop :global(.private-hand) {
     padding: 6px 12px;
@@ -580,16 +584,14 @@
   .tabletop :global(.privacy-note small) {
     display: none;
   }
-  .player-column :global(.player-mat.compact .reserve) {
-    display: none;
-  }
+
   .tabletop .turn-message {
     display: block;
     min-height: auto;
     padding: 10px;
   }
   .tabletop .table-supplies :global(.supply) {
-    --tile-size: 40px;
+    --tile-size: 104px;
   }
   .shared-actions {
     max-width: 590px;
@@ -600,10 +602,7 @@
   .shared-actions.face-north {
     transform: rotate(180deg);
   }
-  .shared-actions.face-east,
-  .shared-actions.face-west {
-    transform: none;
-  }
+
   @media (min-width: 1500px) {
     .personal-layout {
       gap: 30px;
@@ -801,5 +800,42 @@
     .city-column {
       gap: 10px;
     }
+  }
+  .seated-city :global(.city-scroll) {
+    max-height: 184px;
+    overflow: auto;
+  }
+
+  .tabletop-layout {
+    grid-template-columns: 440px minmax(520px, 1fr) 440px;
+    grid-template-rows: 235px minmax(0, 1fr) 235px;
+    height: calc(var(--surface-height, 100svh) - 62px);
+    min-height: 0;
+  }
+  .tabletop .shared-center {
+    max-height: 100%;
+    overflow: auto;
+    padding: 6px 8px 12px;
+    align-self: stretch;
+    scrollbar-width: thin;
+  }
+  .tabletop .seated-city :global(.city-scroll) {
+    max-height: 176px;
+  }
+  .table-pan-hint {
+    font-size: 12px;
+    color: #d9c493;
+    text-align: center;
+  }
+  .tabletop .table-resources {
+    flex-wrap: wrap;
+  }
+  .tabletop .table-resources :global(.domino-market) {
+    min-width: 0;
+    width: 100%;
+    flex-basis: 100%;
+  }
+  .tabletop .table-supplies {
+    margin: auto;
   }
 </style>

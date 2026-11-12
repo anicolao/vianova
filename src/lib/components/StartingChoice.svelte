@@ -1,38 +1,53 @@
 <script lang="ts">
+  import { gameArt } from '../presentation/art';
   import Domino from './Domino.svelte';
   import type { DominoData } from '../presentation/types';
-  let { dominos, onKeep }: { dominos: DominoData[]; onKeep?: (ids: string[]) => void } = $props();
-  let chosen = $state<string[]>([]);
-  const value = $derived(
-    dominos.filter((d) => chosen.includes(d.id)).reduce((n, d) => n + (d.double ? 2 : 1), 0)
-  );
+  let {
+    dominos,
+    onKeep,
+    onToggle,
+    selectedIds = [],
+    selectionValue = 0,
+    canKeep = false,
+    disabled = false
+  }: {
+    dominos: DominoData[];
+    selectedIds?: string[];
+    selectionValue?: number;
+    canKeep?: boolean;
+    disabled?: boolean;
+    onToggle?: (id: string) => void;
+    onKeep?: (ids: string[]) => void;
+  } = $props();
 </script>
 
-<section class="starting-choice" data-component="StartingChoice">
+<section
+  class="starting-choice"
+  style:--tray-art={`url("${gameArt('piece-tray')}")`}
+  data-component="StartingChoice"
+>
   <h3>Choose your starting hand</h3>
   <p>Keep a value of exactly 4. A marked domino counts as 2.</p>
   <div>
     {#each dominos as domino}<Domino
         {domino}
-        selected={chosen.includes(domino.id)}
-        onclick={() =>
-          (chosen = chosen.includes(domino.id)
-            ? chosen.filter((id) => id !== domino.id)
-            : [...chosen, domino.id])}
+        {disabled}
+        selected={selectedIds.includes(domino.id)}
+        onclick={onToggle ? () => onToggle(domino.id) : undefined}
       />{/each}
   </div>
   <footer>
-    <span aria-live="polite">Selection value <b>{value} / 4</b></span><button
+    <span aria-live="polite">Selection value <b>{selectionValue} / 4</b></span><button
       class="control primary"
-      disabled={value !== 4}
-      onclick={() => onKeep?.(chosen)}>Keep selection</button
+      disabled={disabled || !onKeep || !canKeep}
+      onclick={() => onKeep?.(selectedIds)}>Keep selection</button
     >
   </footer>
 </section>
 
 <style>
   .starting-choice {
-    --tile-size: 48px;
+    --tile-size: 96px;
     background: #fff4d7;
     border: 1px solid #ccb77f;
     border-radius: 8px;
@@ -67,5 +82,16 @@
   }
   .starting-choice .control {
     font-size: 11px;
+  }
+
+  .starting-choice {
+    background: var(--tray-art) center/100% 100% no-repeat;
+    border: 0;
+    padding: 30px 24px 22px;
+    color: #2d3b32;
+    border-radius: 7px;
+    box-shadow:
+      0 4px 0 #605139,
+      0 7px 12px #0004;
   }
 </style>

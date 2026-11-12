@@ -2,9 +2,11 @@
   import { tick } from 'svelte';
   import Tile from './Tile.svelte';
   import Population from './Population.svelte';
-  import type { Frame } from '../presentation/types';
-  let { motions, surface }: { motions: Frame['motions']; surface: HTMLElement | undefined } =
-    $props();
+  import type { GamePresentation } from '../presentation/types';
+  let {
+    motions,
+    surface
+  }: { motions: GamePresentation['motions']; surface: HTMLElement | undefined } = $props();
   let positions = $state<{ id: string; x: number; y: number; scale: number; opacity: number }[]>(
     []
   );
@@ -78,7 +80,7 @@
     pointer-events: none;
     z-index: 20;
     overflow: hidden;
-    --tile-size: 65px;
+    --tile-size: 96px;
   }
   .traveler {
     position: absolute;

@@ -17,8 +17,7 @@
     >
   </table>
   <p class="tie-note">Ties: population on the player board, then shared victory.</p>
-  {#if onInspect}<button class="control" onclick={onInspect}>Inspect scoring footprints</button
-    >{/if}
+  {#if onInspect}<button class="control" onclick={onInspect}>Inspect scoring tiles</button>{/if}
 </section>
 
 <style>

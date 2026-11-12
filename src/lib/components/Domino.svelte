@@ -6,19 +6,28 @@
     back = false,
     vertical = false,
     selected = false,
+    disabled = false,
+    reason,
     onclick
   }: {
     domino?: DominoData;
     back?: boolean;
     vertical?: boolean;
     selected?: boolean;
+    disabled?: boolean;
+    reason?: string;
     onclick?: () => void;
   } = $props();
 </script>
 
-{#snippet faces()}<Tile tile={domino?.tiles[0]} {back} /><Tile
+{#snippet faces()}<Tile
+    tile={domino?.tiles[0]}
+    {back}
+    backKind={domino?.tiles[0].start ? `start-${domino.tiles[0].start}` : 'domino'}
+  /><Tile
     tile={domino?.tiles[1]}
     {back}
+    backKind={domino?.tiles[1].start ? `start-${domino.tiles[1].start}` : 'domino'}
   />{#if domino?.double && !back}<span
       class="double"
       title="Costs 2 actions from the market"
@@ -32,9 +41,18 @@
       ? 'Face-down domino'
       : `${domino?.tiles[0].building} / ${domino?.tiles[1].building}${domino?.double ? ' · costs 2 market actions' : ''}`}
     aria-pressed={selected}
+    {disabled}
+    title={reason}
     {onclick}
+    data-domino-id={domino?.id}
     data-component="Domino">{@render faces()}</button
-  >{:else}<div class="domino" class:vertical class:selected data-component="Domino">
+  >{:else}<div
+    class="domino"
+    class:vertical
+    class:selected
+    data-domino-id={domino?.id}
+    data-component="Domino"
+  >
     {@render faces()}
   </div>{/if}
 

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { gameArt } from '../presentation/art';
+  import { rewardKey, type ControlState } from '../presentation/controller';
   import RewardStack from './RewardStack.svelte';
   import Population from './Population.svelte';
   import { owners, type Area } from '../presentation/types';
@@ -7,24 +9,36 @@
     areas,
     onReward,
     onResolve,
-    compact = false
+    compact = false,
+    availability,
+    rewardAvailability,
+    disabled = false,
+    selectedArea,
+    selectedReward,
+    targeting = false
   }: {
     kind: 'battle' | 'invention';
     areas: Area[];
     onReward?: (area: string, reward: string) => void;
     onResolve?: (area: string) => void;
     compact?: boolean;
+    availability?: Record<string, ControlState>;
+    rewardAvailability?: Record<string, ControlState>;
+    disabled?: boolean;
+    selectedArea?: string;
+    selectedReward?: string;
+    targeting?: boolean;
   } = $props();
 </script>
 
 <section
   class="contest-board {kind}"
   class:compact
+  style:--board-art={`url("${gameArt(`board-${kind}`)}")`}
   data-component="ContestBoard"
   aria-label="{kind === 'battle' ? 'Battle' : 'Invention'} board"
 >
   <header>
-    <span>{kind === 'battle' ? '⚔' : '▧'}</span>
     <div>
       <h3>{kind === 'battle' ? 'Battle' : 'Invention'}</h3>
       <p>{kind === 'battle' ? 'Soldiers' : 'Engineers'} compete here</p>
@@ -36,13 +50,21 @@
         <div class="area-top">
           <span class="eyebrow">Area {i + 1}</span>{#if onResolve}<button
               class="resolve"
-              aria-label="Resolve {area.label}"
-              onclick={() => onResolve(area.id)}>Resolve ↗</button
+              disabled={disabled || (!!availability && !availability[area.id]?.enabled)}
+              title={availability?.[area.id]?.reason}
+              aria-pressed={selectedArea === area.id}
+              aria-label="{targeting ? 'Deploy to' : 'Resolve'} {area.label}"
+              onclick={() => onResolve(area.id)}>{targeting ? 'Deploy here' : 'Resolve ↗'}</button
             >{/if}
         </div>
         <div class="rewards">
           {#each area.rewards as reward}<RewardStack
               {reward}
+              selected={selectedReward === reward.id}
+              disabled={disabled ||
+                (!!rewardAvailability &&
+                  !rewardAvailability[rewardKey(area.id, reward.id)]?.enabled)}
+              reason={rewardAvailability?.[rewardKey(area.id, reward.id)]?.reason}
               onclick={onReward ? () => onReward(area.id, reward.id) : undefined}
             />{/each}{#if !area.rewards.length}<div class="no-rewards">Awaiting refill</div>{/if}
         </div>
@@ -90,10 +112,7 @@
     border-bottom: 1px solid #bba781;
     background: linear-gradient(90deg, #fff1d28c, transparent);
   }
-  header > span:first-child {
-    font-size: 23px;
-    color: var(--contest);
-  }
+
   h3 {
     font-size: 24px;
     line-height: 1;
@@ -235,5 +254,95 @@
       width: 22px;
       height: 27px;
     }
+  }
+
+  .contest-board {
+    --tile-size: 96px;
+    background: var(--board-art) center/100% 100% no-repeat;
+    border: 0;
+    border-radius: 9px;
+    padding: 4% 4% 5%;
+    box-shadow:
+      0 5px 0 #66502d,
+      0 9px 15px #0005;
+  }
+  header {
+    background: transparent;
+    border: 0;
+    min-height: 64px;
+    padding: 0 8px 12px 38%;
+  }
+  h3,
+  .compact h3 {
+    font-size: 26px;
+  }
+  header p {
+    font-size: 12px;
+  }
+  .threshold {
+    font-size: 18px;
+    background: #f5e6bd;
+    border: 0;
+  }
+  .threshold small {
+    font-size: 10px;
+  }
+  .areas {
+    grid-template-columns: repeat(2, minmax(214px, 1fr));
+    overflow-x: auto;
+    padding: 0 3px 8px;
+  }
+  .area,
+  .compact .area {
+    padding: 6px;
+  }
+  .area + .area {
+    border: 0;
+  }
+  .area-top .eyebrow {
+    font-size: 12px;
+  }
+  .resolve {
+    font-size: 14px;
+    background: #fff4dbb8;
+  }
+  .contender b,
+  .compact .contender b {
+    width: 23px;
+    height: 23px;
+    font-size: 16px;
+  }
+  .area-population :global(.person),
+  .compact .area-population :global(.person) {
+    width: 36px;
+    height: 44px;
+  }
+  .compact,
+  .invention {
+    --tile-size: 96px;
+  }
+  @media (max-width: 480px) {
+    .contest-board {
+      --tile-size: 96px;
+    }
+  }
+
+  .contest-board.compact header {
+    padding: 8px 9px 14px 38%;
+  }
+  .contender {
+    flex-direction: column;
+    gap: 3px;
+  }
+  .contender-people {
+    flex-wrap: nowrap;
+  }
+  .area-top .eyebrow {
+    font-size: 14px;
+  }
+  .area-top {
+    background: #f5e8cbe8;
+    border-radius: 3px;
+    padding-inline: 5px;
   }
 </style>

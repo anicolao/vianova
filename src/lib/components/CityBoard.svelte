@@ -1,6 +1,13 @@
 <script lang="ts">
   import Tile from './Tile.svelte';
-  import { cellKey, type Cell, type Focus, type DominoData } from '../presentation/types';
+  import { cityGeometry, placementGhost } from '../presentation/geometry';
+  import {
+    cellKey,
+    type Cell,
+    type Focus,
+    type DominoData,
+    type TileData
+  } from '../presentation/types';
   let {
     cells,
     focus = {},
@@ -10,36 +17,29 @@
     onSelect,
     onPlace,
     compact = false,
-    anchorPrefix = 'city'
+    anchorPrefix = 'city',
+    archTile,
+    disabled = false
   }: {
     cells: Cell[];
     focus?: Focus;
     selected?: string | null;
-    staged?: { x: number; y: number; domino: DominoData } | null;
+    staged?: { x: number; y: number; domino?: DominoData } | null;
     rotation?: number;
     onSelect?: (cell: Cell) => void;
     onPlace?: (x: number, y: number) => void;
     compact?: boolean;
     anchorPrefix?: string;
+    archTile?: TileData;
+    disabled?: boolean;
   } = $props();
   let zoom = $state(1);
-  const width = $derived(Math.max(...cells.map((c) => c.x), 0) + 1 + (compact ? 0 : 1));
-  const height = $derived(Math.max(...cells.map((c) => c.y), 0) + 1 + (compact ? 0 : 1));
+  const ghosts = $derived(placementGhost(staged?.domino, archTile, staged ?? null, rotation));
+  const geometry = $derived(cityGeometry(cells, ghosts, !!onPlace));
+  const width = $derived(geometry.width);
+  const coords = $derived(geometry.coords);
   const map = $derived(new Map(cells.map((c) => [cellKey(c.x, c.y), c])));
-  const coords = $derived(
-    Array.from({ length: width * height }, (_, i) => ({ x: i % width, y: Math.floor(i / width) }))
-  );
-  function ghost(x: number, y: number) {
-    if (!staged) return;
-    const dx = rotation % 2 === 0 ? 1 : 0,
-      dy = rotation % 2 ? 1 : 0;
-    const reverse = rotation >= 2;
-    return x === staged.x && y === staged.y
-      ? staged.domino.tiles[reverse ? 1 : 0]
-      : x === staged.x + dx && y === staged.y + dy
-        ? staged.domino.tiles[reverse ? 0 : 1]
-        : undefined;
-  }
+  const previews = $derived(new Map(ghosts.map((c) => [cellKey(c.x, c.y), c.tile])));
 </script>
 
 <section class="city-board" class:compact data-component="CityBoard" aria-label="City grid">
@@ -49,8 +49,8 @@
         >Zoom <input
           aria-label="City zoom"
           type="range"
-          min="0.7"
-          max="1.4"
+          min="1"
+          max="1.8"
           step="0.1"
           bind:value={zoom}
         /></label
@@ -64,7 +64,7 @@
       style:--city-tile="calc(var(--tile-size) * {zoom})"
     >
       {#each coords as { x, y }}
-        {@const key = cellKey(x, y)}{@const cell = map.get(key)}{@const preview = ghost(x, y)}
+        {@const key = cellKey(x, y)}{@const cell = map.get(key)}{@const preview = previews.get(key)}
         <div
           class="cell"
           class:focused={focus.cells?.includes(key)}
@@ -79,6 +79,7 @@
               selected={selected === key}
               highlight={focus.matches?.includes(key)}
               protectedArch={!!staged}
+              {disabled}
               onclick={onSelect ? () => onSelect(cell) : undefined}
             />{#if cell.covered}<span class="layers" aria-label="One covered building"
                 >2 layers</span
@@ -86,7 +87,8 @@
           {:else if preview}<div class="ghost"><Tile tile={preview} /></div>
           {:else if onPlace}<button
               class="empty-cell"
-              aria-label="Stage domino at column {x + 1}, row {y + 1}"
+              {disabled}
+              aria-label="Stage tile at x {x}, y {y}"
               onclick={() => onPlace(x, y)}><span>+</span></button
             >
           {:else}<div class="empty-cell" aria-hidden="true"><span>·</span></div>{/if}
@@ -103,7 +105,7 @@
 <style>
   .city-board {
     min-width: 0;
-    --tile-size: clamp(55px, 5.2vw, 78px);
+    --tile-size: 104px;
   }
   .city-tools {
     display: flex;
@@ -220,7 +222,7 @@
     margin-left: 10px;
   }
   .compact {
-    --tile-size: clamp(42px, 3.4vw, 57px);
+    --tile-size: 104px;
   }
   .compact .city-grid {
     gap: 4px;
@@ -234,7 +236,7 @@
   }
   @media (max-width: 600px) {
     .city-board {
-      --tile-size: 58px;
+      --tile-size: 104px;
     }
     .city-size {
       display: none;
@@ -246,12 +248,12 @@
       font-size: 10px;
     }
     .compact {
-      --tile-size: 44px;
+      --tile-size: 104px;
     }
   }
   @media (min-width: 1800px) {
     .city-board:not(.compact) {
-      --tile-size: 90px;
+      --tile-size: 104px;
     }
   }
 </style>

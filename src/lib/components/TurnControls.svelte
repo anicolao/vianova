@@ -1,39 +1,41 @@
 <script lang="ts">
+  import BuildingSymbol from './BuildingSymbol.svelte';
+  import type { ControlState } from '../presentation/controller';
+  import type { TurnAction } from '../presentation/intents';
   let {
     selected,
-    staged = false,
-    onAction,
-    onRotate,
-    onCancel,
-    onCommit
+    availability,
+    disabled = false,
+    onAction
   }: {
-    selected?: string;
-    staged?: boolean;
-    onAction?: (action: string) => void;
-    onRotate?: () => void;
-    onCancel?: () => void;
-    onCommit?: () => void;
+    selected?: string | null;
+    availability?: Record<TurnAction, ControlState>;
+    disabled?: boolean;
+    onAction?: (action: TurnAction) => void;
   } = $props();
-  const actions = [
-    ['place', '▦', 'Place domino'],
-    ['arch-line', '∩', 'Place Arch'],
-    ['resolve', '⚑', 'Resolve areas'],
-    ['draw', 'Ⅱ', 'Take dominos']
+  const actions: { id: TurnAction; icon: string; label: string }[] = [
+    { id: 'place', icon: '▦', label: 'Place domino' },
+    { id: 'arch-line', icon: '∩', label: 'Place Arch' },
+    { id: 'resolve', icon: '⚑', label: 'Resolve areas' },
+    { id: 'draw', icon: 'Ⅱ', label: 'Take dominos' }
   ];
 </script>
 
 <section class="turn-controls" data-component="TurnControls" aria-label="Turn actions">
-  {#if staged}<div class="placement-actions">
-      <button class="control" onclick={onRotate}>↻ Rotate</button><button
-        class="control"
-        onclick={onCancel}>Cancel</button
-      ><button class="control primary" onclick={onCommit}>Place here ✓</button>
-    </div>{:else}<div class="action-options">
-      {#each actions as [id, icon, label]}<button
-          class:chosen={selected === id}
-          onclick={() => onAction?.(id)}><span>{icon}</span><strong>{label}</strong></button
-        >{/each}
-    </div>{/if}
+  <div class="action-options">
+    {#each actions as action}<button
+        class:chosen={selected === action.id}
+        aria-pressed={selected === action.id}
+        disabled={disabled || !onAction || !availability?.[action.id]?.enabled}
+        title={availability?.[action.id]?.reason}
+        onclick={() => onAction?.(action.id)}
+        ><span
+          >{#if action.id === 'arch-line'}<BuildingSymbol
+              building="arch"
+            />{:else}{action.icon}{/if}</span
+        ><strong>{action.label}</strong></button
+      >{/each}
+  </div>
 </section>
 
 <style>
@@ -55,6 +57,9 @@
     padding: 9px 7px;
   }
   .action-options button > span {
+    display: block;
+    width: 26px;
+    height: 26px;
     color: #d3b974;
     font-size: 20px;
   }
@@ -69,15 +74,6 @@
   .action-options .chosen > span {
     color: #725d31;
   }
-  .placement-actions {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    padding: 3px;
-  }
-  .placement-actions .control {
-    font-size: 11px;
-  }
   @media (max-width: 600px) {
     .action-options button {
       flex-direction: column;
@@ -90,8 +86,9 @@
     .action-options button > span {
       font-size: 18px;
     }
-    .placement-actions {
-      gap: 5px;
-    }
+  }
+
+  .action-options strong {
+    font-size: 14px;
   }
 </style>
