@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, tick } from 'svelte';
   import { base } from '$app/paths';
+  import { replaceState } from '$app/navigation';
   import WorkshopHeader from '$lib/review/WorkshopHeader.svelte';
   import { scenarios, getScenario } from '$lib/presentation/scenarios';
   import { devices, type DeviceId } from '$lib/review/devices';
@@ -60,7 +61,7 @@
     if (landscape) url.searchParams.set('landscape', '1');
     else url.searchParams.delete('landscape');
     url.searchParams.set('time', time.toFixed(2));
-    history.replaceState(null, '', url);
+    replaceState(url, {});
   }
   function choose(id: string) {
     scenarioId = id;
@@ -119,8 +120,13 @@
       reduced = media.matches;
     };
     media.addEventListener('change', mediaChange);
+    let resizeFrame = 0;
     const observer = new ResizeObserver((entries) => {
-      available = Math.max(200, entries[0].contentRect.width - 32);
+      const nextWidth = Math.max(200, entries[0].contentRect.width - 32);
+      cancelAnimationFrame(resizeFrame);
+      resizeFrame = requestAnimationFrame(() => {
+        if (Math.abs(nextWidth - available) > 1) available = nextWidth;
+      });
     });
     if (stage) observer.observe(stage);
     const receive = (e: MessageEvent) => {
@@ -175,6 +181,7 @@
     return () => {
       mounted = false;
       cancelAnimationFrame(raf);
+      cancelAnimationFrame(resizeFrame);
       observer.disconnect();
       window.removeEventListener('message', receive);
       window.removeEventListener('keydown', key);
