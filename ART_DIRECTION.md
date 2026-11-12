@@ -1,6 +1,6 @@
 # Via Nova — Art direction proposals
 
-**Status: awaiting your art-style approval.** These are three original visual explorations for the digital implementation of Stefan Alexander's Via Nova. No direction has been selected. Each sheet compares a city scene, enlarged building tiles, and a phone treatment.
+**Selected direction: option 2 — Mosaic Forum.** The project owner selected the mosaic direction for the component gallery and animation lab. The three original explorations below remain as design history. Each sheet compares a city scene, enlarged building tiles, and a phone treatment. The implemented components and interactions are now awaiting review; selecting the style did not approve every detail of the generated concept sheet.
 
 The concepts were generated with the built-in image generation tool on 2026-11-12. All three images are saved in [art/proposals](art/proposals/); the exact prompts and generation notes are in [prompts.json](art/proposals/prompts.json). They explore visual language rather than reproduce the supplied PDF's illustrations.
 
@@ -72,7 +72,7 @@ These are design judgments to validate in the component prototype, not measured 
 | Main risk | Illustration detail competes with symbols | Texture competes with boundaries | Too restrained or sparse |
 | Relative production effort | High | Medium | Low to medium |
 
-**Recommendation: Architect's Atlas.** Via Nova asks players to compare many colored edges, assess four contests, and read overlapping scoring footprints. Its clear component fields leave the most room for that information on phones while preserving a city-building identity on a shared table. Fresco Civitas is the alternative if illustrated warmth is the stronger priority.
+**Decision: Mosaic Forum.** Use its architectural emblems, mineral colors, dark outlines, ivory components, and navy surround. The first production-facing treatment uses original SVG mosaic buildings with tessera texture inside the artwork and crisp independent rules symbols. Review the actual components at `/gallery/` and their composition at `/dev/animations/`; the generated sheet is visual inspiration, not the interface specification.
 
 ## What the sheets do not approve
 
@@ -82,9 +82,9 @@ The phone inset is a personal-screen concept and may show its owner's hand. A sh
 
 ## Approval and next review
 
-Approve **1 — Fresco Civitas**, **2 — Mosaic Forum**, or **3 — Architect's Atlas**, with any requested adjustments. Approval selects the visual direction; it does not sign off on the illustrative rule shortcuts above.
+Option 2 is selected. The next approval concerns the actual component collection, responsive layouts, and action interactions described in [docs/PRESENTATION.md](docs/PRESENTATION.md), before implementing the ruleset.
 
-After selection, build a small production component sample before producing the complete asset set:
+The component gallery and animation lab now provide the following review samples before producing the complete tile-face manifest:
 
 1. All six buildings at phone and tabletop sizes, including a marked domino and both Arch activations.
 2. A rebuild with a scroll, one with a banner, and a two-tile + reward stack with both scoring panels visible.
