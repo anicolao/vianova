@@ -1,0 +1,9 @@
+{
+  "tool": "built-in imagegen",
+  "date": "2026-11-13",
+  "asset": "static/assets/mosaic/score-banner-v2.png",
+  "source": "/Users/anicolao/.codex/generated_images/01a1d122-423e-7d12-90db-303218f12e9d/exec-6f8738ac-158f-4b4c-b288-b3cb43db30f4.png",
+  "editTarget": "static/assets/mosaic/score-banner.png",
+  "prompt": "Edit this production scoring-material asset for Via Nova. Replace the ornate rectangular framed panel with a CLEAR HANGING ROMAN CLOTH BANNER. Keep warm ivory cloth, antique brass and tactile mineral/painted material compatible with the existing mosaic game art. Genuine transparent exterior. Wide horizontal composition around 3:1 filling canvas, orthographic front view. Minimum actual display is 96 x 25 CSS pixels, so silhouette must read immediately at that tiny size: one substantial brass rod across the TOP, visible cloth draped from it, broad folded shoulders, TWO LARGE LONG POINTED cloth tails near the LEFT and RIGHT outer fifths, with bold inward notches beside them. The CENTRAL 60% of the banner must retain a broad quiet UNTEXTURED ivory scoring field extending nearly to the bottom, for separately overlaid live icons and numerals. Deep notches and outer tails occupy the OUTER areas, not the center scoring field. Make the hanging cloth outline and droop unmistakable; broad shapes and restrained low-contrast cloth weave, few folds. No navy mosaic picture-frame border, no nested rectangles, no tiny ornament. Use a thin dark-umber contour and softly shaded physical hem so the silhouette stands out against ivory stone. NO lettering, NO numerals, NO scoring symbols or other icons. Only the material layer, not a mockup or complete tile. The provided image is the edit target and palette/material reference; its rectangular decorative frame is what must change.",
+  "transparent": true
+}

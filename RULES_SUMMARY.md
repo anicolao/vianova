@@ -120,9 +120,8 @@ Highest total wins. A tie is broken by the greatest population **on the player b
 
 ## Designer review and implementation questions
 
-The text and diagrams establish the core rules, but the PDF is not a complete machine-readable component manifest. Resolve these items with Stefan before locking rules behavior:
+The designer’s v56 print-and-play workbook and PDFs now establish the [complete component manifest](COMPONENT_MANIFEST.md), including exact faces, marks, starting coordinates and turn-order allocations. Source discrepancies are recorded there. Resolve these remaining behavior questions with Stefan before locking rules behavior:
 
-- **Exact component inventory:** obtain every domino face, double-domino mark, rebuild face, + mark, and scoring symbol, together with the A/B/C starting coordinates and all four turn-order setup allocations. The overview pictures alone cannot establish the full distribution.
 - **Setup procedure:** confirm per-player starting-hand draw/return order and any rule for an opening draw with no subset totaling exactly four. Confirm whether returned dominos retain a player-chosen or prescribed order.
 - **Placement conventions:** confirm the formal square-grid placement constraints, rotations of starting tiles, and whether the single Arch's activation direction must start at an adjacent occupied building. The examples show empty, non-overlapping city spaces and edge adjacency.
 - **Action timing:** clarify whether the three actions of a domino Arch must stay together, and exactly how two Quarry actions can be combined to buy a marked market domino when other generated actions intervene.

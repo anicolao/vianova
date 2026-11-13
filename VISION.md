@@ -40,7 +40,7 @@ The design must also handle interruptions: a disconnected phone can rejoin its e
 
 Deliver complete v56 play for 2, 3, and 4 players: player-count setup, starting selection, all four turn options, optional action sequencing, both Arch types, all contest outcomes, stacked rewards, mandatory rebuild placement, the final-turn sequence, final resolution, and full scoring including shared victories.
 
-Include invitations, reconnect, a readable history, contextual rules, and a component gallery using the actual production components. The art direction remains pending approval; the three proposals in [ART_DIRECTION.md](ART_DIRECTION.md) explore different treatments of the same game.
+Include invitations, reconnect, a readable history, contextual rules, and a component gallery using the actual production components. Mosaic Forum (option 2) is selected in [ART_DIRECTION.md](ART_DIRECTION.md). The initial component gallery and animation lab establish the presentation layer for review before implementing rules, invitations, or network recovery.
 
 Computer opponents, public matchmaking, accounts and rankings, chat, expansions, native app packaging, and competitive anti-cheat are later possibilities. They are outside the initial release.
 

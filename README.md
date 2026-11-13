@@ -11,11 +11,28 @@ The supplied v56 rules describe a game for **2–4 players**, ages **10+**, with
 - [VISION.md](VISION.md): intended experience, device modes, scope, and delivery principles.
 - [RULES_SUMMARY.md](RULES_SUMMARY.md): implementation-oriented summary of the supplied rules, including scoring and questions for the designer.
 - [ART_DIRECTION.md](ART_DIRECTION.md): three illustrated visual proposals, tradeoffs, and an approval checklist.
+- [docs/PRESENTATION.md](docs/PRESENTATION.md): component architecture, animation review, routes, and validation.
+- [docs/ASSETS.md](docs/ASSETS.md): original mosaic artwork and bundled font provenance.
 - [Via Nova Rules - v56.pdf](Via%20Nova%20Rules%20-%20v56.pdf): source rules, including component and setup illustrations.
 
 ## Current status
 
-The repository contains the supplied rulebook and initial design documents. There is no runnable application, chosen art direction, or implemented rules engine yet. Art concepts are review material, not playable screens or approved production assets. Installation and deployment instructions will be added with the application scaffold.
+**Mosaic Forum (option 2) is the selected art direction.** A Svelte 5 / SvelteKit workshop now demonstrates the production-facing presentation components before rules implementation. The gallery shows the complete v56 tile inventory, setup allocations, component families and scoring key, built from layered generated mosaic artwork with shared building silhouettes and supporting family inks. Rolled scrolls and hanging cloth banners provide distinct scoring materials. The tile registration view exposes the actual artwork, emblems and scoring layers for adjustment and export. The animation lab has 15 scrub-able action studies, rendered through the same Svelte components in native mobile, tablet, desktop, and tabletop viewports.
+
+There is no rules engine, networking, or complete playable game yet. The standalone review routes use one shared presentation controller for specific-object selection, targeting, confirmation, cancellation, pending/error/retry, and inspection. A deterministic fixture adapter simulates outcomes; prepared studies are a separate mode. The [complete v56 manifest](COMPONENT_MANIFEST.md) comes from the designer’s print-and-play references; interactive and timeline fixtures remain explicitly simulated.
+
+## Run the workshop
+
+Use Node 24 and Bun 1.3.10, or enter the supplied `nix develop` shell:
+
+```sh
+bun install --frozen-lockfile
+bun run dev
+```
+
+Open `http://127.0.0.1:5196/` or `/gallery/` for the component collection, `/dev/animations/` for the animation lab, `/dev/layers/` for layer registration, `/review/` for the personal-screen fixture, and `/tabletop/` for the shared-table fixture. The lab offers fit/native scale, portrait/landscape, timeline scrubbing, playback speed, loop, beat selection, and reduced motion. See the [review guide](docs/PRESENTATION.md) for controls and architectural boundaries.
+
+Run `bunx playwright install chromium` once, then `bun run verify` for Svelte/TypeScript checks, presentation unit tests, Chromium browser journeys, and the static build. Same-repository PRs publish retained GitHub Pages previews at `/vianova/prNUMBER/` after verification.
 
 ## Planned play
 
