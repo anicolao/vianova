@@ -87,7 +87,23 @@
   </RegisteredLayer>
   <RegisteredLayer id="score-ink" placement={ink} presentation={layerPresentation}>
     <svg class="score-ink" data-layer="score-ink" viewBox="0 0 76 28" aria-hidden="true">
+      <!-- Supporting VP cue shares the number's footprint; the dark numeral stays foremost. -->
+      <g
+        class="vp-laurel"
+        data-vp-symbol="laurel"
+        transform="translate({(mark.target === 'fixed' ? 38 : 6) - 12} 0)"
+      >
+        {#each [false, true] as mirrored}
+          <g transform={mirrored ? 'translate(24 0) scale(-1 1)' : undefined}>
+            <path class="stem" d="M11 25C2 22 1 13 5 4" />
+            <path
+              d="M5 8Q0 6 3 2Q6 4 5 8ZM3 13Q-1 11 0 7Q4 8 3 13ZM3 18Q-1 17 0 13Q4 14 3 18ZM6 23Q1 23 1 19Q5 18 6 23Z"
+            />
+          </g>
+        {/each}
+      </g>
       <text
+        data-vp-value={mark.multiplier}
         x={mark.target === 'fixed' ? 38 : 6}
         y="14.5"
         dominant-baseline="central"
@@ -188,5 +204,15 @@
   .divider {
     font-size: 14px;
     font-weight: 400;
+  }
+  .vp-laurel {
+    fill: #967332;
+    opacity: 0.75;
+  }
+  .stem {
+    fill: none;
+    stroke: #967332;
+    stroke-width: 1.2;
+    stroke-linecap: round;
   }
 </style>

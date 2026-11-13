@@ -53,3 +53,6 @@ The tabletop keeps 96–104 px pieces and pans city windows, reserve wells and t
 ![Direct interaction distinct from prepared playback](lab-direct.png)
 
 All outcomes are simulated through the fixture adapter; no rules authority or multiplayer service is implemented. The browser suite also captures phone landscape and tablet layouts under `test-results/review/`; CI uploads the complete report and failure traces. See [the integration boundary](../PRESENTATION.md), [component manifest](../../COMPONENT_MANIFEST.md) and [artwork prompt ledger](../../art/mosaic/prompts.json).
+
+
+VP recognition refinement: the shared scoring ink now includes a muted gold vector laurel around/behind the live VP numeral, keeping the number dark and its size unchanged. Both scrolls and banners use this cue, including fixed VP awards. Banner ink moves down from y=78% to y=79.5% of the tile to sit on the cloth field; scroll ink and all material bounds stay unchanged. This adjustment is in the editable production registration, including standalone gallery plaques. Actual-size colour/grayscale and phone captures accompany this revision; physical viewing-distance approval remains outstanding.

@@ -16,7 +16,7 @@ describe('shared tile layer registration', () => {
     score: { shape: 'banner', multiplier: 1, target: 'quarry' },
     plus: true
   };
-  it('generalizes the supplied Library calibration across all families and scoring shapes', () => {
+  it('shares supplied calibration across families with the cloth banner ink adjustment', () => {
     expect(parseRegistration(JSON.parse(JSON.stringify(shippedRegistration)))).toEqual(
       shippedRegistration
     );
@@ -26,6 +26,7 @@ describe('shared tile layer registration', () => {
     for (const building of buildings) {
       expect(shippedRegistration.faces[building].symbol).toEqual(symbol);
       for (const shape of ['scroll', 'banner'] as const) {
+        const expectedInk = { ...ink, y: shape === 'banner' ? 79.5 : 78 };
         const layout = tileRegistration(shippedRegistration, {
           id: `${building}-${shape}`,
           building,
@@ -33,11 +34,13 @@ describe('shared tile layer registration', () => {
         });
         expect(layout['building-symbol']).toEqual(symbol);
         expect(layout['score-material']).toEqual(material);
-        expect(layout['score-ink']).toEqual(ink);
+        expect(layout['score-ink']).toEqual(expectedInk);
         expect(ink.x).toBeGreaterThanOrEqual(material.x);
         expect(ink.x + ink.width).toBeLessThanOrEqual(material.x + material.width);
-        expect(ink.y).toBeGreaterThanOrEqual(material.y);
-        expect(ink.y + ink.height).toBeLessThanOrEqual(material.y + material.height);
+        expect(expectedInk.y).toBeGreaterThanOrEqual(material.y);
+        expect(expectedInk.y + expectedInk.height).toBeLessThanOrEqual(
+          material.y + material.height
+        );
       }
     }
     expect(shippedRegistration.faces.library.symbol).not.toBe(
