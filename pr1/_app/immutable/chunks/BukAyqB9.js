@@ -1,0 +1,1 @@
+import{l as e}from"./DumlTilc.js";var t=Symbol(`Review registration session`),n=2166136261;for(let t of JSON.stringify(e))n=Math.imul(n^t.charCodeAt(0),16777619);var r=(n>>>0).toString(16),i=e=>`vianova:${e}:tile-registration:v1:${r}`,a=e=>`vianova:${e}:tile-registration-draft:v1:${r}`;export{a as n,t as r,i as t};

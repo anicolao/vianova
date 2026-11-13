@@ -1,0 +1,1 @@
+import"../chunks/CzjzkiLV.js";import"../chunks/xihTtKlq.js";import"../chunks/BFE07P3a.js";import{t as e}from"../chunks/BjBV-XrW.js";function t(t){e(t,{forceTabletop:!0})}export{t as component};
