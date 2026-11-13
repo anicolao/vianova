@@ -56,3 +56,6 @@ All outcomes are simulated through the fixture adapter; no rules authority or mu
 
 
 VP recognition refinement: the shared scoring ink now includes a muted gold vector laurel around/behind the live VP numeral, keeping the number dark and its size unchanged. Both scrolls and banners use this cue, including fixed VP awards. Banner ink moves down from y=78% to y=79.5% of the tile to sit on the cloth field; scroll ink and all material bounds stay unchanged. This adjustment is in the editable production registration, including standalone gallery plaques. Actual-size colour/grayscale and phone captures accompany this revision; physical viewing-distance approval remains outstanding.
+
+
+Action-value recognition: shared `ActionValue.svelte` frames each action number as a square stone building tile, with a restrained lintel and dark live numeral. Arch tiles and the generated action queue use exactly this component. The single Arch’s three sequential building actions each have their own framed 2; VP values retain the contrasting laurel. Registered tile bounds and controller semantics are unchanged. Phone and tabletop captures show the same shared treatment.

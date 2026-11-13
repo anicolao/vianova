@@ -1,6 +1,7 @@
 <script lang="ts">
   import { gameArt } from '../presentation/art';
   import BuildingSymbol from './BuildingSymbol.svelte';
+  import ActionValue from './ActionValue.svelte';
   import { buildingInfo, type Building } from '../presentation/types';
   let {
     actions,
@@ -48,7 +49,7 @@
           action.building
         ].action}"
         ><span class="action-emblem"><BuildingSymbol building={action.building} /></span><span
-          class="action-number">{action.count}</span
+          class="action-number"><ActionValue value={action.count} /></span
         ><span
           ><strong>{buildingInfo[action.building].name}</strong><small
             >{buildingInfo[action.building].action}</small
@@ -101,9 +102,9 @@
     flex: 1;
   }
   .action-number {
-    font-size: 22px;
-    font-weight: 700;
-    color: #937532;
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
   }
   .action-queue strong {
     font-size: 11px;

@@ -2,6 +2,7 @@
   import { getContext } from 'svelte';
   import { readable, type Readable } from 'svelte/store';
   import BuildingSymbol from './BuildingSymbol.svelte';
+  import ActionValue from './ActionValue.svelte';
   import { gameArt } from '../presentation/art';
   import BuildingArt from './BuildingArt.svelte';
   import ScoreSymbol from './ScoreSymbol.svelte';
@@ -73,9 +74,17 @@
       class="arch-actions"
       viewBox="0 0 76 22"
       aria-hidden="true"
-      ><text x="38" y="11.5" dominant-baseline="central" text-anchor="middle"
-        >{tile.arch === '3' ? '3' : '2 · 2 · 2'}</text
-      ></svg
+      >{#each tile.arch === '3' ? [3] : [2, 2, 2] as value, i}
+        <svg
+          x={tile.arch === '3' ? 27 : 1 + i * 26}
+          y="0"
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+        >
+          <ActionValue {value} />
+        </svg>
+      {/each}</svg
     >
   {:else if id === 'start-letter' && tile}<svg class="start" viewBox="0 0 22 18" aria-hidden="true"
       ><text x="11" y="9.5" dominant-baseline="central" text-anchor="middle">{tile.start}</text
@@ -203,12 +212,6 @@
     width: 100%;
     height: 100%;
     fill: currentColor;
-  }
-  .arch-actions text {
-    font:
-      700 19px 'Atkinson Hyperlegible',
-      sans-serif;
-    letter-spacing: 0.04em;
   }
   .start text {
     font:
