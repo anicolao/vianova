@@ -2,6 +2,8 @@
 
 Current captures from the actual shared Svelte components after the generated mosaic artwork, full v56 inventory and interaction-controller cleanup. `bun run verify` passes: zero Svelte errors/warnings, 34 unit tests, 28 Chromium browser journeys and the static build. Screenshots establish rendered evidence; they do not establish designer approval or human icon recognition. Phone/tablet/tabletop hardware review remains outstanding.
 
+The current tile captures use the owner-supplied Library calibration generalized to all six families and both scoring shapes: 15% emblems at (5%,5%), lower scoring material (0%,74%,100%,26%), and ink (25%,78%,55%,20%). Other supplied marks are retained. Stored settings from earlier calibration revisions no longer mask newly shipped defaults.
+
 ## Tile registration
 
 The `/dev/layers/` route renders the actual shared tile assembly. It provides direct drag/keyboard/numeric edits, per-layer visibility/isolation, exploded stacking, real-size comparison, undo/redo, recoverable drafts, browser-wide application and portable JSON export.

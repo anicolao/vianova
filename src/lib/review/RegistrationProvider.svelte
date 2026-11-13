@@ -8,10 +8,14 @@
     registrationContext,
     type RegistrationBook
   } from '../presentation/tile-registration';
-  import { reviewRegistrationContext, type RegistrationSession } from './registration-session';
+  import {
+    registrationCacheKey,
+    reviewRegistrationContext,
+    type RegistrationSession
+  } from './registration-session';
   let { children }: { children: Snippet } = $props();
   const store = writable<RegistrationBook>(cloneRegistration());
-  const key = `vianova:${base}:tile-registration:v1`;
+  const key = registrationCacheKey(base);
   let error = $state('');
   setContext(registrationContext, store);
   setContext<RegistrationSession>(reviewRegistrationContext, {

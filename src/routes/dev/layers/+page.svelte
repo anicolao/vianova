@@ -20,11 +20,12 @@
     type TileLayer
   } from '$lib/presentation/tile-registration';
   import {
+    registrationDraftKey,
     reviewRegistrationContext,
     type RegistrationSession
   } from '$lib/review/registration-session';
 
-  const draftKey = `vianova:${base}:tile-registration-draft:v1`;
+  const draftKey = registrationDraftKey(base);
   const session = getContext<RegistrationSession>(reviewRegistrationContext);
   const specimens: {
     id: string;

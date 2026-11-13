@@ -60,6 +60,15 @@ test('drafts are isolated; applying and restoring synchronizes the real gallery 
   page,
   context
 }) => {
+  // Simulate saved settings and a tab draft from the previous published preview.
+  // They must remain available in storage without masking the newly shipped layout.
+  const previous = JSON.parse(JSON.stringify(shippedRegistration));
+  previous.faces.library.symbol = { ...previous.faces.library.symbol, x: 4, width: 26, height: 26 };
+  await context.addInitScript((book) => {
+    localStorage.setItem('vianova::tile-registration:v1', JSON.stringify(book));
+    localStorage.setItem('vianova::tile-registration:v1:previous', JSON.stringify(book));
+    sessionStorage.setItem('vianova::tile-registration-draft:v1', JSON.stringify(book));
+  }, previous);
   await page.goto('/dev/layers/?piece=invention-02');
   await expect(page.getByLabel('Manifest piece')).toBeEnabled();
   await page.getByRole('button', { name: /^Building emblem/ }).click();
@@ -78,6 +87,13 @@ test('drafts are isolated; applying and restoring synchronizes the real gallery 
     '[data-review-id="building-library"] [data-registration-layer="building-symbol"]'
   );
   await expectX(emblem, initialLibraryX);
+  expect(
+    await page.evaluate(
+      () =>
+        JSON.parse(localStorage.getItem('vianova::tile-registration:v1')!).faces.library.symbol
+          .width
+    )
+  ).toBe(26);
   const lab = await context.newPage();
   await lab.goto('/dev/animations/');
   const inLab = lab

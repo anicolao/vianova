@@ -109,3 +109,8 @@ Minimum-use briefs: building faces 96 px square; scoring plaques 94×36 px with 
 The shared tile assembly now has a registration editor at `/dev/layers/`, backed by [one checked-in configuration](src/lib/presentation/tile-registration.json). Emblems have face-specific offsets; scoring material and ink are independently registered by shape. The scoring plaque’s generated border is nine-sliced to preserve a usable ink opening instead of vertically stretching ornament into it. Scoring ink is one scalable SVG group; family symbol viewBoxes remove internal whitespace, and starting letters/Arch values use explicit text canvases. Actual-size comparisons and exploded/isolated inspection use the exact shared production component. Existing PNG assets are unchanged.
 
 This pass corrects alignment and exposes remaining image constraints for review. The underlying face still combines illustration, rim and reserved regions in one bitmap; separating those features would require new artwork layers. Applied authoring overrides are browser-local; approved JSON exports become the shipped source configuration.
+
+
+## Owner-supplied calibration · 13 November 2026
+
+Apply the corrected Library geometry across all tiles: emblems at x=5%, y=5%, width=15%, height=15%; scroll and banner material at x=0%, y=74%, width=100%, height=26%; ink at x=25%, y=78%, width=55%, height=20%. These supplied proportions replace the first-pass registration and size targets above. All other supplied marks and artwork transforms are retained. Refreshed actual-size gallery/game captures document this common layout. Browser appearance overrides are scoped to the shipped calibration, so older locally saved layouts do not mask the refreshed preview.

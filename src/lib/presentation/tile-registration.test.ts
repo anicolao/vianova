@@ -7,7 +7,7 @@ import {
   shippedRegistration,
   tileRegistration
 } from './tile-registration';
-import type { TileData } from './types';
+import { buildings, type TileData } from './types';
 
 describe('shared tile layer registration', () => {
   const tile: TileData = {
@@ -16,22 +16,29 @@ describe('shared tile layer registration', () => {
     score: { shape: 'banner', multiplier: 1, target: 'quarry' },
     plus: true
   };
-  it('calibrates independent face emblems and places ink in the plaque opening', () => {
+  it('generalizes the supplied Library calibration across all families and scoring shapes', () => {
     expect(parseRegistration(JSON.parse(JSON.stringify(shippedRegistration)))).toEqual(
       shippedRegistration
     );
-    const scroll = shippedRegistration.scores.scroll,
-      banner = shippedRegistration.scores.banner;
-    for (const [shape, { material, ink }] of [
-      ['scroll', scroll],
-      ['banner', banner]
-    ] as const) {
-      expect(ink.x).toBeGreaterThanOrEqual(material.x + 8);
-      expect(ink.x + ink.width).toBeLessThanOrEqual(material.x + material.width - 8);
-      expect(ink.y).toBeGreaterThanOrEqual(material.y + 3);
-      expect(ink.y + ink.height).toBeLessThanOrEqual(
-        material.y + material.height - (shape === 'banner' ? 5 : 3)
-      );
+    const symbol = { x: 5, y: 5, width: 15, height: 15, rotation: 0, opacity: 1 };
+    const material = { x: 0, y: 74, width: 100, height: 26, rotation: 0, opacity: 1 };
+    const ink = { x: 25, y: 78, width: 55, height: 20, rotation: 0, opacity: 1 };
+    for (const building of buildings) {
+      expect(shippedRegistration.faces[building].symbol).toEqual(symbol);
+      for (const shape of ['scroll', 'banner'] as const) {
+        const layout = tileRegistration(shippedRegistration, {
+          id: `${building}-${shape}`,
+          building,
+          score: { shape, multiplier: 1, target: 'quarry' }
+        });
+        expect(layout['building-symbol']).toEqual(symbol);
+        expect(layout['score-material']).toEqual(material);
+        expect(layout['score-ink']).toEqual(ink);
+        expect(ink.x).toBeGreaterThanOrEqual(material.x);
+        expect(ink.x + ink.width).toBeLessThanOrEqual(material.x + material.width);
+        expect(ink.y).toBeGreaterThanOrEqual(material.y);
+        expect(ink.y + ink.height).toBeLessThanOrEqual(material.y + material.height);
+      }
     }
     expect(shippedRegistration.faces.library.symbol).not.toBe(
       shippedRegistration.faces.barracks.symbol

@@ -13,8 +13,8 @@
       "symbol": {
         "x": 5,
         "y": 5,
-        "width": 26,
-        "height": 26,
+        "width": 15,
+        "height": 15,
         "rotation": 0,
         "opacity": 1
       }
@@ -29,10 +29,10 @@
         "opacity": 1
       },
       "symbol": {
-        "x": 4,
-        "y": 4,
-        "width": 26,
-        "height": 26,
+        "x": 5,
+        "y": 5,
+        "width": 15,
+        "height": 15,
         "rotation": 0,
         "opacity": 1
       }
@@ -48,9 +48,9 @@
       },
       "symbol": {
         "x": 5,
-        "y": 4,
-        "width": 25,
-        "height": 25,
+        "y": 5,
+        "width": 15,
+        "height": 15,
         "rotation": 0,
         "opacity": 1
       }
@@ -66,9 +66,9 @@
       },
       "symbol": {
         "x": 5,
-        "y": 3,
-        "width": 25,
-        "height": 25,
+        "y": 5,
+        "width": 15,
+        "height": 15,
         "rotation": 0,
         "opacity": 1
       }
@@ -83,10 +83,10 @@
         "opacity": 1
       },
       "symbol": {
-        "x": 4,
-        "y": 4,
-        "width": 26,
-        "height": 26,
+        "x": 5,
+        "y": 5,
+        "width": 15,
+        "height": 15,
         "rotation": 0,
         "opacity": 1
       }
@@ -101,10 +101,10 @@
         "opacity": 1
       },
       "symbol": {
-        "x": 4,
-        "y": 4,
-        "width": 26,
-        "height": 26,
+        "x": 5,
+        "y": 5,
+        "width": 15,
+        "height": 15,
         "rotation": 0,
         "opacity": 1
       }
@@ -113,36 +113,36 @@
   "scores": {
     "scroll": {
       "material": {
-        "x": 2,
-        "y": 61.8,
-        "width": 96,
-        "height": 37.2,
+        "x": 0,
+        "y": 74,
+        "width": 100,
+        "height": 26,
         "rotation": 0,
         "opacity": 1
       },
       "ink": {
-        "x": 10,
-        "y": 65.8,
-        "width": 80,
-        "height": 29.2,
+        "x": 25,
+        "y": 78,
+        "width": 55,
+        "height": 20,
         "rotation": 0,
         "opacity": 1
       }
     },
     "banner": {
       "material": {
-        "x": 2,
-        "y": 61.8,
-        "width": 96,
-        "height": 37.2,
+        "x": 0,
+        "y": 74,
+        "width": 100,
+        "height": 26,
         "rotation": 0,
         "opacity": 1
       },
       "ink": {
-        "x": 10,
-        "y": 64.8,
-        "width": 80,
-        "height": 29.2,
+        "x": 25,
+        "y": 78,
+        "width": 55,
+        "height": 20,
         "rotation": 0,
         "opacity": 1
       }
