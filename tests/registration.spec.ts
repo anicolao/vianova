@@ -3,7 +3,9 @@ import { shippedRegistration } from '../src/lib/presentation/tile-registration';
 const initialLibraryX = shippedRegistration.faces.library.symbol.x;
 const changedLibraryX = initialLibraryX + 7;
 const expectX = async (locator: Locator, x: number) => {
-  await expect.poll(() => locator.evaluate((el) => (el as HTMLElement).style.left)).toBe(`${x}%`);
+  // Native locator assertions retry safely across the lab iframe's initial navigation.
+  const value = `${x}%`.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  await expect(locator).toHaveAttribute('style', new RegExp(`(?:^|;)\\s*left:\\s*${value}(?:;|$)`));
 };
 import { readFileSync } from 'node:fs';
 const canvas = (page: import('@playwright/test').Page) => page.locator('.canvas-bed');
