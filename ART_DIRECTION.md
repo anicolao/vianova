@@ -102,3 +102,10 @@ The initial markup illustration pass was rejected as insufficiently tactile. The
 The composition follows Pantheon’s art/material/live-ink separation and Hanami’s painted pieces with precise overlaid affordances. Richness belongs to physical form and broad material; it must not compete with icon recognition. The monochrome vector symbols deliberately follow the print-and-play semantics instead of miniature artwork or emoji. Scoring shape and footprint are redundant cues, not colour codes. Generated artwork is for review; aesthetic and icon recognition approval remains with the designer and project owner.
 
 Minimum-use briefs: building faces 96 px square; scoring plaques 94×36 px with 24 px target symbols; population 44×52 px interactive; boards roughly 340 px wide with locally panning reward areas. The gallery uses larger 128 px specimens but production routes retain the same layers. Review at actual phone/tabletop size and in grayscale before approval. Native hardware and viewing-distance review is still needed.
+
+
+## Layer registration pass
+
+The shared tile assembly now has a registration editor at `/dev/layers/`, backed by [one checked-in configuration](src/lib/presentation/tile-registration.json). Emblems have face-specific offsets; scoring material and ink are independently registered by shape. The scoring plaque’s generated border is nine-sliced to preserve a usable ink opening instead of vertically stretching ornament into it. Scoring ink is one scalable SVG group; family symbol viewBoxes remove internal whitespace, and starting letters/Arch values use explicit text canvases. Actual-size comparisons and exploded/isolated inspection use the exact shared production component. Existing PNG assets are unchanged.
+
+This pass corrects alignment and exposes remaining image constraints for review. The underlying face still combines illustration, rim and reserved regions in one bitmap; separating those features would require new artwork layers. Applied authoring overrides are browser-local; approved JSON exports become the shipped source configuration.

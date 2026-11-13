@@ -165,7 +165,10 @@
     allocation. Generated artwork, shared building symbols, scoring plaques and live values are
     separate production layers. Direct outcomes remain simulated. Two conflicting print-back entries
     are documented in COMPONENT_MANIFEST.md.
-    <a href="https://github.com/anicolao/vianova/blob/feat/mosaic-component-gallery/COMPONENT_MANIFEST.md">Component manifest ↗</a>
+    <a
+      href="https://github.com/anicolao/vianova/blob/feat/mosaic-component-gallery/COMPONENT_MANIFEST.md"
+      >Component manifest ↗</a
+    >
   </div>
 </main>
 <footer class="work-footer">
@@ -197,6 +200,7 @@
         <dt>Review reference</dt>
         <dd>{selected.id}</dd>
       </dl>
+      <a class="control" href="{base}/dev/layers/">Adjust tile layers →</a>
       <a class="control" href="{base}/dev/animations/">Review in motion →</a>
     </div>{/if}
 </dialog>

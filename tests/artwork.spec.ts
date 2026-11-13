@@ -19,7 +19,7 @@ test('rich shared layers load, keep symbols consistent and permit monochrome com
   const scroll = page.locator('[data-review-id="scroll-quarry-1"]');
   await expect(scroll.locator('[data-building-symbol="quarry"]')).toHaveCount(2); // same symbol in both scoring panels
   await expect(scroll.locator('[data-layer="score-material"]').first()).toHaveAttribute(
-    'src',
+    'data-asset',
     /score-scroll.png$/
   );
   await page.screenshot({ path: 'test-results/review/mosaic-scoring.png', fullPage: true });

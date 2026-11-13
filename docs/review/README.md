@@ -1,6 +1,18 @@
 # Review evidence
 
-Current captures from the actual shared Svelte components after the generated mosaic artwork, full v56 inventory and interaction-controller cleanup. `bun run verify` passes: zero Svelte errors/warnings, 29 unit tests, 25 Chromium browser journeys and the static build. Screenshots establish rendered evidence; they do not establish designer approval or human icon recognition. Phone/tablet/tabletop hardware review remains outstanding.
+Current captures from the actual shared Svelte components after the generated mosaic artwork, full v56 inventory and interaction-controller cleanup. `bun run verify` passes: zero Svelte errors/warnings, 34 unit tests, 28 Chromium browser journeys and the static build. Screenshots establish rendered evidence; they do not establish designer approval or human icon recognition. Phone/tablet/tabletop hardware review remains outstanding.
+
+## Tile registration
+
+The `/dev/layers/` route renders the actual shared tile assembly. It provides direct drag/keyboard/numeric edits, per-layer visibility/isolation, exploded stacking, real-size comparison, undo/redo, recoverable drafts, browser-wide application and portable JSON export.
+
+![Shared tile registration with corrected defaults](layer-registration.png)
+
+![Exploded stack with a deliberately displaced test draft](layer-stack.png)
+
+![Phone editor with an unapplied imported draft](layer-registration-phone.png)
+
+Scoring ink now follows one registered SVG canvas inside a generated nine-slice plaque; emblem geometry is independently calibrated per family. Applied geometry updates the already-open gallery and animation iframe. These captures are inspection evidence, not designer approval.
 
 ## Layered physical pieces
 

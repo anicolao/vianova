@@ -1,6 +1,6 @@
 <script lang="ts">
   import { base } from '$app/paths';
-  let { active = 'gallery' }: { active?: 'gallery' | 'lab' } = $props();
+  let { active = 'gallery' }: { active?: 'gallery' | 'lab' | 'layers' } = $props();
 </script>
 
 <header class="work-header">
@@ -18,6 +18,11 @@
         class:current={active === 'lab'}
         aria-current={active === 'lab' ? 'page' : undefined}
         href="{base}/dev/animations/">Animation lab <span aria-hidden="true">↗</span></a
+      >
+      <a
+        class:current={active === 'layers'}
+        aria-current={active === 'layers' ? 'page' : undefined}
+        href="{base}/dev/layers/">Tile layers</a
       >
     </nav>
   </div>

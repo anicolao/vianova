@@ -4,7 +4,8 @@
   import '@fontsource/atkinson-hyperlegible/400.css';
   import '@fontsource/atkinson-hyperlegible/700.css';
   import '$lib/theme.css';
+  import RegistrationProvider from '$lib/review/RegistrationProvider.svelte';
   let { children } = $props();
 </script>
 
-{@render children()}
+<RegistrationProvider>{@render children()}</RegistrationProvider>

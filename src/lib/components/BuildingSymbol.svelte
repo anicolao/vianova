@@ -1,10 +1,23 @@
 <script lang="ts">
   import type { Building } from '../presentation/types';
+  const viewBoxes: Record<Building, string> = {
+    quarry: '4 2 26 28',
+    market: '2 2 28 28',
+    temple: '2 2 28 28',
+    barracks: '3 2 26 28',
+    library: '0 2 32 28',
+    arch: '2 2 28 28'
+  };
   let { building }: { building: Building } = $props();
 </script>
 
 <!-- Designer's six semantic silhouettes; shared by buildings, scores and actions. -->
-<svg viewBox="0 0 32 32" class="building-symbol" data-building-symbol={building} aria-hidden="true">
+<svg
+  viewBox={viewBoxes[building]}
+  class="building-symbol"
+  data-building-symbol={building}
+  aria-hidden="true"
+>
   {#if building === 'quarry'}
     <path d="M5 6Q19 2 29 13L25 16Q18 9 7 10Z" fill="currentColor" />
     <path d="M19 8L7 28" fill="none" stroke="currentColor" stroke-width="5" />
@@ -17,11 +30,11 @@
       stroke-width="3"
     />
   {:else if building === 'temple'}
-    <path d="M6 3H26V8H23L21 12V22L25 25V29H7V25L11 22V12L9 8H6Z" fill="currentColor" />
+    <path d="M3 3H29V8H24L21 12V22L29 25V29H3V25L11 22V12L8 8H3Z" fill="currentColor" />
   {:else if building === 'barracks'}
     <path d="M4 3L10 5L24 22L20 26L6 9ZM28 3L22 5L8 22L12 26L26 9Z" fill="currentColor" />
     <path
-      d="M17 24L25 17M7 17L15 24M23 25L28 30M9 25L4 30"
+      d="M17 24L25 17M7 17L15 24M23 25L28 29M9 25L4 29"
       fill="none"
       stroke="currentColor"
       stroke-width="3"

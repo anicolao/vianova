@@ -1,8 +1,20 @@
 <script lang="ts">
+  import { getContext } from 'svelte';
+  import { readable, type Readable } from 'svelte/store';
   import BuildingSymbol from './BuildingSymbol.svelte';
   import { gameArt } from '../presentation/art';
   import BuildingArt from './BuildingArt.svelte';
   import ScoreSymbol from './ScoreSymbol.svelte';
+  import RegisteredLayer from './RegisteredLayer.svelte';
+  import {
+    presentLayers,
+    registrationContext,
+    shippedRegistration,
+    tileRegistration,
+    type RegistrationBook,
+    type TileRegistration,
+    type LayerPresentation
+  } from '../presentation/tile-registration';
   import { buildingInfo, scoreLabel, type TileData } from '../presentation/types';
   let {
     tile,
@@ -13,7 +25,9 @@
     protectedArch = false,
     disabled = false,
     reason,
-    onclick
+    onclick,
+    registration,
+    layerPresentation
   }: {
     tile?: TileData;
     back?: boolean;
@@ -24,7 +38,16 @@
     disabled?: boolean;
     reason?: string;
     onclick?: () => void;
+    registration?: TileRegistration;
+    layerPresentation?: LayerPresentation;
   } = $props();
+  const book =
+    getContext<Readable<RegistrationBook>>(registrationContext) ?? readable(shippedRegistration);
+  const layout = $derived(registration ?? tileRegistration($book, tile, back));
+  const faceLayers = $derived(presentLayers(tile, back, backKind, protectedArch));
+  const inspection = $derived(
+    layerPresentation ? { ...layerPresentation, order: faceLayers } : undefined
+  );
   const label = $derived(
     back
       ? `Face-down ${backKind} tile`
@@ -34,34 +57,75 @@
   );
 </script>
 
-{#snippet face()}
-  {#if back}<span class="tile-back"
-      ><img src={gameArt('tile-back')} alt="" draggable="false" />{#if backKind !== 'domino'}<span
-          class="back-mark"
-          >{#if backKind.startsWith('start-')}{backKind.slice(-1)}{:else}<BuildingSymbol
-              building={backKind === 'battle' ? 'barracks' : 'library'}
-            />{/if}</span
-        >{/if}</span
-    >
-  {:else if tile}<BuildingArt building={tile.building} /><span
+{#snippet layer(id: keyof TileRegistration)}
+  {#if id === 'artwork'}
+    {#if back}<img
+        class="back-art"
+        src={gameArt('tile-back')}
+        alt=""
+        draggable="false"
+      />{:else if tile}<BuildingArt building={tile.building} />{/if}
+  {:else if id === 'building-symbol' && tile}<span
       class="building-emblem"
       data-layer="building-symbol"><BuildingSymbol building={tile.building} /></span
-    ><span class="tile-name">{buildingInfo[tile.building].name}</span>{#if tile.start}<span
-        class="start">{tile.start}</span
-      >{/if}{#if tile.startCorner}<span class="start-arrow {tile.startCorner}" aria-hidden="true"
-        >◀</span
-      >{/if}{#if tile.score}<span class="tile-score"><ScoreSymbol mark={tile.score} /></span
-      >{/if}{#if tile.arch}<span class="arch-actions">{tile.arch === '3' ? '3' : '2 · 2 · 2'}</span
-      >{/if}{#if tile.plus}<span class="plus">+</span
-      >{/if}{#if protectedArch && tile.building === 'arch'}<span class="protected">Permanent</span
-      >{/if}
-  {:else}<span class="empty-tile">—</span>{/if}
+    >
+  {:else if id === 'arch-value' && tile}<svg
+      class="arch-actions"
+      viewBox="0 0 76 22"
+      aria-hidden="true"
+      ><text x="38" y="11.5" dominant-baseline="central" text-anchor="middle"
+        >{tile.arch === '3' ? '3' : '2 · 2 · 2'}</text
+      ></svg
+    >
+  {:else if id === 'start-letter' && tile}<svg class="start" viewBox="0 0 22 18" aria-hidden="true"
+      ><text x="11" y="9.5" dominant-baseline="central" text-anchor="middle">{tile.start}</text
+      ></svg
+    >
+  {:else if id === 'start-arrow-top-right' || id === 'start-arrow-bottom-left'}<svg
+      class="start-arrow"
+      viewBox="0 0 18 18"
+      aria-hidden="true"><path d="M1 9L17 1V17Z" fill="currentColor" /></svg
+    >
+  {:else if id === 'plus'}<span class="plus"
+      ><svg viewBox="0 0 24 24" aria-hidden="true"
+        ><text x="12" y="12.5" dominant-baseline="central" text-anchor="middle">+</text></svg
+      ></span
+    >
+  {:else if id === 'protected'}<svg class="protected" viewBox="0 0 88 18" aria-hidden="true"
+      ><text x="44" y="9.5" dominant-baseline="central" text-anchor="middle">Permanent</text></svg
+    >
+  {:else if id === 'back-mark'}<span class="back-mark"
+      >{#if backKind.startsWith('start-')}<svg viewBox="0 0 50 50" aria-hidden="true"
+          ><text x="25" y="25.5" dominant-baseline="central" text-anchor="middle"
+            >{backKind.slice(-1)}</text
+          ></svg
+        >{:else}<BuildingSymbol
+          building={backKind === 'battle' ? 'barracks' : 'library'}
+        />{/if}</span
+    >{/if}
+{/snippet}
+{#snippet registered(id: keyof TileRegistration)}<RegisteredLayer
+    {id}
+    placement={layout[id]}
+    presentation={inspection}>{@render layer(id)}</RegisteredLayer
+  >{/snippet}
+{#snippet face()}
+  {#if back || tile}{#each faceLayers as id}
+      {#if id === 'score-material' && tile?.score}<ScoreSymbol
+          mark={tile.score}
+          registration={layout}
+          canvas
+          layerPresentation={inspection}
+        />
+      {:else if id !== 'score-ink'}{@render registered(id)}{/if}
+    {/each}{:else}<span class="empty-tile">—</span>{/if}
 {/snippet}
 {#if onclick}<button
     class="tile"
     class:selected
     class:highlight
     class:starting={!!tile?.start}
+    class:separated={!!layerPresentation?.separation}
     aria-label={label}
     aria-pressed={selected}
     {disabled}
@@ -69,13 +133,14 @@
     {onclick}
     data-tile-id={tile?.id}
     data-component="Tile"
-    data-building={tile?.building}>{@render face()}</button
+    data-building={back ? 'hidden' : tile?.building}>{@render face()}</button
   >
 {:else}<div
     class="tile"
     class:selected
     class:highlight
     class:starting={!!tile?.start}
+    class:separated={!!layerPresentation?.separation}
     role="img"
     aria-label={label}
     data-tile-id={tile?.id}
@@ -102,17 +167,22 @@
     overflow: hidden;
     container-type: inline-size;
     color: #30251a;
+    transform-style: preserve-3d;
   }
-  .tile :global(.building-art) {
-    border-radius: inherit;
+  .tile.separated {
+    overflow: visible;
+  }
+  .tile :global(.building-art),
+  .back-art {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border-radius: 4%;
   }
   .building-emblem {
-    position: absolute;
-    top: 5%;
-    left: 5%;
-    width: 26%;
-    height: 26%;
-    padding: 1%;
+    width: 100%;
+    height: 100%;
+    display: block;
     color: #2b231b;
   }
   .tile.selected {
@@ -126,102 +196,45 @@
     outline: 3px dashed #fff0a5;
     outline-offset: 1px;
   }
-  .tile-name {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    overflow: hidden;
-    clip-path: inset(50%);
+  .arch-actions,
+  .start,
+  .start-arrow {
+    display: block;
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
   }
-  .tile-score {
-    position: absolute;
-    bottom: 1%;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-  .tile-score :global(.score-symbol) {
-    width: 94cqw;
-    height: 34cqw;
-    min-height: 30px;
-  }
-  .tile-score :global(.target) {
-    width: max(24px, 24cqw);
-    height: max(24px, 24cqw);
-  }
-  .tile-score :global(b) {
-    font-size: max(16px, 19cqw);
-  }
-  .tile-score :global(.range) {
-    width: max(18px, 18cqw);
-    height: max(18px, 18cqw);
-  }
-  .arch-actions {
-    position: absolute;
-    bottom: 4%;
-    left: 50%;
-    transform: translateX(-50%);
+  .arch-actions text {
     font:
-      700 max(16px, 19cqw) / 1.2 'Atkinson Hyperlegible',
+      700 19px 'Atkinson Hyperlegible',
       sans-serif;
-    white-space: nowrap;
     letter-spacing: 0.04em;
   }
+  .start text {
+    font:
+      700 18px 'Atkinson Hyperlegible',
+      sans-serif;
+  }
   .plus {
-    position: absolute;
-    top: 4%;
-    right: 5%;
     background: #fff4ce;
-    color: #261e15;
     border: 2px solid #3d3021;
-    width: 25%;
-    height: 25%;
+    width: 100%;
+    height: 100%;
     display: grid;
     place-items: center;
     font: bold max(18px, 24cqw) / 1 sans-serif;
   }
-  .start {
-    position: absolute;
-    bottom: 5%;
-    left: 42%;
-    font-size: max(16px, 18cqw);
-    font-weight: 700;
-  }
-  .start-arrow {
-    position: absolute;
-    font-size: 19px;
-    color: #201c18;
-  }
-  .top-right {
-    top: 2%;
-    right: 2%;
-    transform: rotate(135deg);
-  }
-  .bottom-left {
-    bottom: 2%;
-    left: 2%;
-    transform: rotate(-45deg);
-  }
   .protected {
-    position: absolute;
-    top: 36%;
-    left: 6%;
-    right: 6%;
+    width: 100%;
     text-align: center;
     background: #eee3c9e8;
     color: #302731;
     font-size: 12px;
     font-weight: 700;
   }
-  .tile-back,
-  .tile-back img {
-    display: block;
+  .back-mark {
     width: 100%;
     height: 100%;
-  }
-  .back-mark {
-    position: absolute;
-    inset: 24%;
     background: #f3e5c3;
     border: 2px solid #9d793d;
     display: grid;
@@ -239,5 +252,32 @@
   }
   button.tile:hover {
     filter: brightness(1.08);
+  }
+  .plus svg,
+  .back-mark svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    fill: currentColor;
+  }
+  .plus text {
+    font:
+      700 24px 'Atkinson Hyperlegible',
+      sans-serif;
+  }
+  .back-mark text {
+    font:
+      700 28px Georgia,
+      serif;
+  }
+  .protected {
+    height: 100%;
+    display: block;
+    fill: currentColor;
+  }
+  .protected text {
+    font:
+      700 14px 'Atkinson Hyperlegible',
+      sans-serif;
   }
 </style>
