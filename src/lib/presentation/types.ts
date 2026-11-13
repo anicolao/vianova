@@ -3,13 +3,41 @@ export const buildings = ['quarry', 'market', 'temple', 'barracks', 'library', '
 export type Building = (typeof buildings)[number];
 export type Owner = 'teal' | 'coral' | 'gold' | 'lilac';
 export const owners: Owner[] = ['teal', 'coral', 'gold', 'lilac'];
-export const buildingInfo: Record<Building, { name: string; action: string; color: string }> = {
-  quarry: { name: 'Quarry', action: 'Take a domino', color: '#d8b64b' },
-  market: { name: 'Market', action: 'Create a Soldier or Engineer', color: '#db8c40' },
-  temple: { name: 'Temple', action: 'Upgrade a Soldier or Engineer', color: '#73a9c2' },
-  barracks: { name: 'Barracks', action: 'Deploy a Soldier', color: '#b9564b' },
-  library: { name: 'Library', action: 'Deploy an Engineer', color: '#7c9e69' },
-  arch: { name: 'Arch', action: 'Activate adjacent buildings', color: '#a78cbd' }
+export const buildingInfo: Record<
+  Building,
+  { name: string; action: string; color: string; symbolColor: string }
+> = {
+  quarry: { name: 'Quarry', action: 'Take a domino', color: '#d8b64b', symbolColor: '#906408' },
+  market: {
+    name: 'Market',
+    action: 'Create a Soldier or Engineer',
+    color: '#db8c40',
+    symbolColor: '#ac5016'
+  },
+  temple: {
+    name: 'Temple',
+    action: 'Upgrade a Soldier or Engineer',
+    color: '#73a9c2',
+    symbolColor: '#22698c'
+  },
+  barracks: {
+    name: 'Barracks',
+    action: 'Deploy a Soldier',
+    color: '#b9564b',
+    symbolColor: '#a0382c'
+  },
+  library: {
+    name: 'Library',
+    action: 'Deploy an Engineer',
+    color: '#7c9e69',
+    symbolColor: '#3e7039'
+  },
+  arch: {
+    name: 'Arch',
+    action: 'Activate adjacent buildings',
+    color: '#a78cbd',
+    symbolColor: '#76508f'
+  }
 };
 export type ScoreMark = {
   shape: 'scroll' | 'banner';

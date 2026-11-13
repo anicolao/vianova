@@ -4,6 +4,8 @@ Current captures from the actual shared Svelte components after the generated mo
 
 The current tile captures use the owner-supplied Library calibration generalized to all six families and both scoring shapes: 15% emblems at (5%,5%), lower scoring material (0%,74%,100%,26%), and ink (25%,78%,55%,20%). Other supplied marks are retained. Stored settings from earlier calibration revisions no longer mask newly shipped defaults.
 
+The scoring recognition pass adds a generated cloth banner with a dark recess to show its cutouts on pale tiles, and matching family inks on building emblems and scoring targets. Registration coordinates remain the supplied calibration. Scroll and banner shapes, their footprints and building silhouettes remain independently recognizable in grayscale.
+
 ## Tile registration
 
 The `/dev/layers/` route renders the actual shared tile assembly. It provides direct drag/keyboard/numeric edits, per-layer visibility/isolation, exploded stacking, real-size comparison, undo/redo, recoverable drafts, browser-wide application and portable JSON export.
@@ -14,7 +16,7 @@ The `/dev/layers/` route renders the actual shared tile assembly. It provides di
 
 ![Phone editor with an unapplied imported draft](layer-registration-phone.png)
 
-Scoring ink now follows one registered SVG canvas inside a generated nine-slice plaque; emblem geometry is independently calibrated per family. Applied geometry updates the already-open gallery and animation iframe. These captures are inspection evidence, not designer approval.
+Scoring ink follows one registered SVG canvas with separate rolled-scroll and hanging-cloth materials; emblem geometry is independently calibrated per family. Applied geometry updates the already-open gallery and animation iframe. These captures are inspection evidence, not designer approval.
 
 ## Layered physical pieces
 
@@ -25,6 +27,8 @@ Scoring ink now follows one registered SVG canvas inside a generated nine-slice 
 ![Monochrome symbol comparison](mosaic-monochrome.png)
 
 ![Shared building/scoring symbols and distinct plaques](mosaic-scoring.png)
+
+![Scoring silhouettes without colour](mosaic-scoring-monochrome.png)
 
 ## Same pieces in game compositions
 

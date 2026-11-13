@@ -67,7 +67,7 @@
       />{:else if tile}<BuildingArt building={tile.building} />{/if}
   {:else if id === 'building-symbol' && tile}<span
       class="building-emblem"
-      data-layer="building-symbol"><BuildingSymbol building={tile.building} /></span
+      data-layer="building-symbol"><BuildingSymbol building={tile.building} colored /></span
     >
   {:else if id === 'arch-value' && tile}<svg
       class="arch-actions"

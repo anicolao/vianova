@@ -22,5 +22,5 @@ provenance and print metadata discrepancies in COMPONENT_MANIFEST.md.
 
 Generated production mosaic assets are included under GPL-3.0-only to the
 extent copyright applies. Exact prompts and generation provenance are in
-art/mosaic/prompts.json. Their inclusion is not designer approval of the
+art/mosaic/prompts.json and the revision prompt records in art/mosaic/. Their inclusion is not designer approval of the
 rendered component designs or icon recognition at physical viewing distance.

@@ -165,7 +165,7 @@ export const galleryItems: GalleryItem[] = [
       description:
         b === 'arch'
           ? 'Purple · permanent · cannot be covered.'
-          : 'Generated mosaic building, tactile stone edge and shared monochrome identity symbol.',
+          : 'Generated mosaic building, tactile stone edge and shared symbol in its family ink.',
       tile: tile(b, `building-${b}`)
     })
   ),

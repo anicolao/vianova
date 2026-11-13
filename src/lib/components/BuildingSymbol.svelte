@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Building } from '../presentation/types';
+  import { buildingInfo, type Building } from '../presentation/types';
   const viewBoxes: Record<Building, string> = {
     quarry: '4 2 26 28',
     market: '2 2 28 28',
@@ -8,7 +8,7 @@
     library: '0 2 32 28',
     arch: '2 2 28 28'
   };
-  let { building }: { building: Building } = $props();
+  let { building, colored = false }: { building: Building; colored?: boolean } = $props();
 </script>
 
 <!-- Designer's six semantic silhouettes; shared by buildings, scores and actions. -->
@@ -16,6 +16,8 @@
   viewBox={viewBoxes[building]}
   class="building-symbol"
   data-building-symbol={building}
+  data-symbol-tone={colored ? 'building' : 'ink'}
+  style:color={colored ? buildingInfo[building].symbolColor : undefined}
   aria-hidden="true"
 >
   {#if building === 'quarry'}

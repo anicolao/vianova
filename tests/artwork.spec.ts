@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { shippedRegistration } from '../src/lib/presentation/tile-registration';
-import type { Building } from '../src/lib/presentation/types';
+import { buildings, buildingInfo, type Building } from '../src/lib/presentation/types';
 
 test('rich shared layers load, keep symbols consistent and permit monochrome comparison', async ({
   page
@@ -24,7 +24,37 @@ test('rich shared layers load, keep symbols consistent and permit monochrome com
     'data-asset',
     /score-scroll.png$/
   );
+  for (const shape of ['scroll', 'banner'] as const) {
+    for (const b of buildings) {
+      const sample = page.locator(`[data-review-id="${shape}-${b}-${b === 'arch' ? 2 : 1}"]`);
+      const symbols = sample.locator(
+        `[data-component="ScoreSymbol"] [data-building-symbol="${b}"]`
+      );
+      await expect(symbols).toHaveCount(2);
+      const hex = buildingInfo[b].symbolColor;
+      const rgb = `rgb(${parseInt(hex.slice(1, 3), 16)}, ${parseInt(hex.slice(3, 5), 16)}, ${parseInt(hex.slice(5, 7), 16)})`;
+      for (const symbol of await symbols.all()) {
+        await expect(symbol).toHaveAttribute('data-symbol-tone', 'building');
+        await expect(symbol).toHaveCSS('color', rgb);
+      }
+    }
+  }
+  const banner = page.locator('[data-review-id="banner-quarry-1"]');
+  await expect(banner.locator('img[data-layer="score-material"]').first()).toHaveAttribute(
+    'src',
+    /score-banner-v2.png$/
+  );
+  await expect(banner.locator('[data-layer="banner-recess"]')).toHaveCount(1);
   await page.screenshot({ path: 'test-results/review/mosaic-scoring.png', fullPage: true });
+  await page.getByRole('button', { name: 'Compare without colour', exact: true }).click();
+  await expect(banner.locator('.cloth-banner').first()).toBeVisible();
+  await expect(scroll.locator('[data-scoring-range="scroll"]').first()).toBeVisible();
+  await expect(banner.locator('[data-scoring-range="banner"]').first()).toBeVisible();
+  await page.screenshot({
+    path: 'test-results/review/mosaic-scoring-monochrome.png',
+    fullPage: true
+  });
+
   const broken = await page
     .locator('img')
     .evaluateAll((elements) =>
